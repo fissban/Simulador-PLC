@@ -151,6 +151,7 @@ class ExpressionManager
      * - referencias por nombre: `#NOMBRE_REGISTRO`
      * - operadores aritméticos: +, -, *, /
      * - comparadores: >, <, >=, <=, ==, !=
+    * - operador lógico AND: &&
      * - funciones declaradas en `functionsCatalog`
      */
     private evaluate(expression: string): number
@@ -161,7 +162,21 @@ class ExpressionManager
         /** Punto de entrada del parser (precedencia más baja). */
         const parseExpression = (): number =>
         {
-            return parseComparison();
+            return parseLogicalAnd();
+        };
+
+        /** Parsea el operador lógico AND después de resolver comparaciones. */
+        const parseLogicalAnd = (): number =>
+        {
+            let value = parseComparison();
+
+            while (matchOperator("&&"))
+            {
+                const right = parseComparison();
+                value = toBoolNumber(value >= 0.5 && right >= 0.5);
+            }
+
+            return value;
         };
 
         /** Parsea comparadores entre dos expresiones aritméticas. */
@@ -385,6 +400,13 @@ class ExpressionManager
             if (/\s/.test(char))
             {
                 cursor++;
+                continue;
+            }
+
+            if (expression.slice(cursor, cursor + 2) === "&&")
+            {
+                tokens.push({ type: "operator", value: "&&" });
+                cursor += 2;
                 continue;
             }
 

@@ -8,6 +8,8 @@ interface AddressTable
     registerTemplates?: RegisterTemplate[];
 }
 
+export type RegisterGroup = "analogicos" | "digitales" | "directos";
+
 export enum RegisterTypes
 {
     // Bit R/W (FC 1/5/15). Ej: salidas digitales, relés, flags de control.
@@ -28,6 +30,7 @@ export interface AddressRegister
 {
     address: number;
     type: RegisterTypes;
+    group: RegisterGroup;
     name: string;
     value: number | boolean;
     description?: string;
@@ -41,6 +44,7 @@ export interface AddressRegister
 interface RegisterTemplate
 {
     type: RegisterTypes;
+    group: RegisterGroup;
     startAddress: number;
     step: number;
     count: number;
@@ -104,6 +108,7 @@ class AddressData
                     const register: AddressRegister = {
                         address: template.startAddress + i * template.step,
                         type: template.type,
+                        group: template.group,
                         name: templateName,
                         value: override?.value ?? template.defaultValue,
                         description: templateDescription,

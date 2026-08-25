@@ -52,7 +52,7 @@ h1 {
     font-size: clamp(2rem, 4vw, 3rem);
 }
 
-.status-card, .summary-bar, .table-card {
+.status-card, .summary-bar, .group-tabs, .table-card {
     border: 1px solid rgba(148, 163, 184, 0.18);
     background: rgba(15, 23, 42, 0.72);
     backdrop-filter: blur(12px);
@@ -122,6 +122,102 @@ h1 {
     font-size: 1.2rem;
 }
 
+.group-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 18px;
+    border-radius: 14px;
+}
+
+.group-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    text-align: left;
+}
+
+.group-tab:hover {
+    background: rgba(51, 65, 85, 0.45);
+    color: #e5e7eb;
+}
+
+.group-tab.active {
+    border-color: rgba(96, 165, 250, 0.45);
+    background: rgba(37, 99, 235, 0.2);
+    color: #dbeafe;
+}
+
+.group-tab strong {
+    min-width: 2ch;
+    color: #60a5fa;
+    text-align: right;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.search-bar label {
+    color: #cbd5e1;
+    font-size: 0.84rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.search-controls {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+}
+
+.search-controls input {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 13px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 9px;
+    outline: none;
+    background: rgba(15, 23, 42, 0.72);
+    color: #e5e7eb;
+}
+
+.search-controls input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.14);
+}
+
+.search-controls input::placeholder {
+    color: #64748b;
+}
+
+.clear-search {
+    padding: 0 14px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 9px;
+    background: transparent;
+    color: #cbd5e1;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.clear-search:hover {
+    border-color: #60a5fa;
+    color: #dbeafe;
+}
+
 .table-card {
     border-radius: 18px;
     overflow: hidden;
@@ -161,6 +257,12 @@ tr:nth-child(even) td {
     background: rgba(15, 23, 42, 0.34);
 }
 
+.empty-state {
+    padding: 36px;
+    color: #94a3b8;
+    text-align: center;
+}
+
 @media (max-width: 900px) {
     .hero {
         flex-direction: column;
@@ -168,5 +270,15 @@ tr:nth-child(even) td {
 
     .summary-bar {
         grid-template-columns: 1fr;
+    }
+
+    .search-bar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .group-tabs {
+        flex-direction: column;
     }
 }

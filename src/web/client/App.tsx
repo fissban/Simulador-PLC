@@ -1,9 +1,12 @@
 import {For, Show, createEffect, createMemo, createSignal, onCleanup, onMount} from "solid-js";
 
+type RegisterGroup = "analogicos" | "digitales" | "directos";
+
 type RegisterRow = {
 	address: number;
 	formattedAddress: string;
 	type: string;
+	group: RegisterGroup;
 	name: string;
 	description: string;
 	writable: string;
@@ -18,6 +21,11 @@ type RegistersResponse = {
 };
 
 const POLL_INTERVAL_MS = 1000;
+const groups: Array<{key: RegisterGroup; label: string}> = [
+	{key: "analogicos", label: "Analógicos"},
+	{key: "digitales", label: "Digitales"},
+	{key: "directos", label: "Directos"},
+];
 const columns: Array<{key: keyof RegisterRow; label: string}> = [
 	{key: "formattedAddress", label: "Address"},
 	{key: "type", label: "Type"},
@@ -33,10 +41,27 @@ const columns: Array<{key: keyof RegisterRow; label: string}> = [
 
 export function App() {
 	const [rows, setRows] = createSignal<RegisterRow[]>([]);
+	const [selectedGroup, setSelectedGroup] = createSignal<RegisterGroup>("analogicos");
+	const [searchText, setSearchText] = createSignal("");
 	const [status, setStatus] = createSignal("Conectando...");
 	const [lastUpdated, setLastUpdated] = createSignal<string | null>(null);
 
-	const totalCount = createMemo(() => rows().length);
+	const groupRows = createMemo(() => rows().filter((row) => row.group === selectedGroup()));
+	const visibleRows = createMemo(() => {
+		const query = searchText().trim().toLocaleLowerCase();
+
+		if (!query) {
+			return groupRows();
+		}
+
+		return groupRows().filter((row) => [
+			row.formattedAddress,
+			row.type,
+			row.name,
+			row.description,
+		].some((value) => value.toLocaleLowerCase().includes(query)));
+	});
+	const totalCount = createMemo(() => visibleRows().length);
 
 	const refreshRows = async (): Promise<void> => {
 		try {
@@ -94,7 +119,7 @@ export function App() {
 
 			<section class="summary-bar">
 				<div>
-					<span class="summary-label">Total de registros</span>
+					<span class="summary-label">Registros del grupo</span>
 					<strong>{totalCount()}</strong>
 				</div>
 				<div>
@@ -102,6 +127,37 @@ export function App() {
 					<strong>{POLL_INTERVAL_MS} ms</strong>
 				</div>
 			</section>
+
+			<nav class="group-tabs" aria-label="Grupos de registros">
+				<For each={groups}>{(group) => (
+					<button
+						class="group-tab"
+						classList={{active: selectedGroup() === group.key}}
+						type="button"
+						aria-selected={selectedGroup() === group.key}
+						onClick={() => setSelectedGroup(group.key)}
+					>
+						<span>{group.label}</span>
+						<strong>{rows().filter((row) => row.group === group.key).length}</strong>
+					</button>
+				)}</For>
+			</nav>
+
+			<div class="search-bar">
+				<label for="register-search">Buscar registros</label>
+				<div class="search-controls">
+					<input
+						id="register-search"
+						type="search"
+						value={searchText()}
+						onInput={(event) => setSearchText(event.currentTarget.value)}
+						placeholder="Address, type, name o description"
+					/>
+					<Show when={searchText()}>
+						<button class="clear-search" type="button" onClick={() => setSearchText("")}>Limpiar</button>
+					</Show>
+				</div>
+			</div>
 
 			<section class="table-card">
 				<div class="table-scroll">
@@ -112,13 +168,15 @@ export function App() {
 							</tr>
 						</thead>
 						<tbody>
-							<For each={rows()}>
+							<Show when={visibleRows().length > 0} fallback={<tr><td class="empty-state" colSpan={columns.length}>No hay registros en este grupo.</td></tr>}>
+							<For each={visibleRows()}>
 								{(row) => (
 									<tr>
 										<For each={columns}>{(column) => <td>{row[column.key]}</td>}</For>
 									</tr>
 								)}
 							</For>
+							</Show>
 						</tbody>
 					</table>
 				</div>

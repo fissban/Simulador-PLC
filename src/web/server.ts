@@ -1,7 +1,7 @@
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
-import { addressData, RegisterTypes } from "../data/AddressData";
+import { addressData, RegisterGroup, RegisterTypes } from "../data/AddressData";
 import { serverConfigData } from "../data/ServerConfigData";
 import { bufferManager } from "../simulator/managers/BufferManager";
 
@@ -10,6 +10,7 @@ interface RegisterRow
     address: number;
     formattedAddress: string;
     type: RegisterTypes;
+    group: RegisterGroup;
     name: string;
     description: string;
     writable: string;
@@ -80,6 +81,7 @@ function buildRows(): RegisterRow[]
         address: register.address,
         formattedAddress: formatAddress(register.address, register.type, register.bit),
         type: register.type,
+        group: register.group,
         name: register.name,
         description: register.description ?? "",
         writable: String(register.writable ?? false),
