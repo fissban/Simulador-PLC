@@ -31,11 +31,11 @@ class ServerConfigData
 		{
 			const serverConfigPath = path.resolve(__dirname, '../../config/server-config.json');
 			this.config = this.parseFileJSON(serverConfigPath);
-			console.log('ServerConfigData -> Configuración cargada:', this.config);
+			console.log('[ServerConfig] Configuración cargada:', this.config);
 		}
 		catch (error)
 		{
-			console.error('Error al cargar la configuración del servidor:', error);
+			console.error('[ServerConfig][ERROR] No se pudo cargar la configuración:', error);
 		}
 	}
 

@@ -37,12 +37,16 @@ export function startModbusServer(): void
                     bufferManager.setFloat32(reg.address, Number(reg.value));
                     break;
 
+                case RegisterTypes.HOLDING_REGISTER_BIT:
+                    bufferManager.setBit(reg.address, reg.bit ?? 0, Boolean(reg.value));
+                    break;
+
                 default:
-                    console.warn(`[Init] Tipo no soportado o no reconocido (${reg.type}) en dir ${reg.address}`);
+                    console.warn(`[Modbus][WARN] Tipo no soportado o no reconocido (${reg.type}) en dir ${reg.address}`);
             }
         }
 
-        console.log(`[Init] Memoria cargada exitosamente con ${registers.length} registros.`);
+        console.log(`[Modbus] Memoria cargada: ${registers.length} registros.`);
     }
     // ============================================================================
     // MÉTODOS HELPER (GET / SET) PARA EL BUFFER
@@ -72,18 +76,18 @@ export function startModbusServer(): void
     // Error de red a nivel socket TCP.
     server.on("socketError", (error: Error) =>
     {
-        console.error("Error de socket Modbus:", error.message);
+        console.error("[Modbus][ERROR] Error de socket:", error.message);
     });
     // Error genérico del servidor Modbus.
     server.on("error", (error: Error) =>
     {
-        console.error("Error del servidor Modbus:", error.message);
+        console.error("[Modbus][ERROR] Error del servidor:", error.message);
     });
 
     // Evento de inicialización del servidor Modbus TCP.
     server.on("initialized", function ()
     {
-        console.log(`Servidor Modbus TCP iniciado en ${serverData.host}:${serverData.port}`);
+        console.log(`[Modbus] Servidor TCP iniciado en ${serverData.host}:${serverData.port}`);
         // Cargar la tabla antes de iniciar el servidor
         initBuffersFromAddressData();
         

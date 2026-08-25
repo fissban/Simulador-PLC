@@ -14,6 +14,8 @@ interface ExpressionBinding
     registerName: string;
     registerType: RegisterTypes;
     registerAddress: number;
+    /** Índice de bit (0-15), presente solo cuando registerType es HOLDING_REGISTER_BIT. */
+    registerBit?: number;
     expression: string;
 }
 
@@ -87,6 +89,7 @@ class ExpressionManager
                 registerName: register.name,
                 registerType: register.type,
                 registerAddress: register.address,
+                registerBit: register.bit,
                 expression: register.expression
             });
         }
@@ -125,6 +128,10 @@ class ExpressionManager
                         bufferManager.setFloat32(binding.registerAddress, rawValue);
                         break;
 
+                    case RegisterTypes.HOLDING_REGISTER_BIT:
+                        bufferManager.setBit(binding.registerAddress, binding.registerBit ?? 0, rawValue >= 0.5);
+                        break;
+
                     default:
                         break;
                 }
@@ -132,7 +139,7 @@ class ExpressionManager
             catch (error)
             {
                 const message = error instanceof Error ? error.message : String(error);
-                console.warn(`[Expression] Error en ${binding.registerName}: ${message}`);
+                console.warn(`[Expression][WARN] Error en ${binding.registerName}: ${message}`);
             }
         }
     }
@@ -498,6 +505,9 @@ class ExpressionManager
 
             case RegisterTypes.HOLDING_REGISTER_FLOAT:
                 return bufferManager.getFloat32(register.address);
+
+            case RegisterTypes.HOLDING_REGISTER_BIT:
+                return bufferManager.getBit(register.address, register.bit ?? 0) ? 1 : 0;
 
             default:
                 return Number(register.value);

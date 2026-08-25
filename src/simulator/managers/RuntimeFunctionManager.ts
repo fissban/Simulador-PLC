@@ -108,6 +108,8 @@ interface RuntimeBinding
     registerType: RegisterTypes;
     /** Dirección Modbus del registro. */
     registerAddress: number;
+    /** Índice de bit (0-15), presente solo cuando registerType es HOLDING_REGISTER_BIT. */
+    registerBit?: number;
     /** Expresión de función tal como aparece en la configuración, ej: "sine(0,100)". */
     expression: string;
 }
@@ -154,11 +156,12 @@ class RuntimeFunctionManager
                 registerName: register.name,
                 registerType: register.type,
                 registerAddress: register.address,
+                registerBit: register.bit,
                 expression: register.runtimeFunction
             });
         }
 
-        console.log(`[RuntimeFn] Funciones activas: ${this.bindings.length}`);
+        console.log(`[RuntimeFunction] Funciones activas: ${this.bindings.length}`);
     }
 
     /**
@@ -202,6 +205,10 @@ class RuntimeFunctionManager
                         bufferManager.setFloat32(binding.registerAddress, rawValue);
                         break;
 
+                    case RegisterTypes.HOLDING_REGISTER_BIT:
+                        bufferManager.setBit(binding.registerAddress, binding.registerBit ?? 0, rawValue >= 0.5);
+                        break;
+
                     default:
                         break;
                 }
@@ -209,7 +216,7 @@ class RuntimeFunctionManager
             catch (error)
             {
                 const message = error instanceof Error ? error.message : String(error);
-                console.warn(`[RuntimeFn] Error en ${binding.registerName}: ${message}`);
+                console.warn(`[RuntimeFunction][WARN] Error en ${binding.registerName}: ${message}`);
             }
         }
     }

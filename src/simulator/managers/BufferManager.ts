@@ -2,7 +2,7 @@ class BufferManager
 {
     // 1. Memoria unificada mediante Buffers
     COILS_QTY = 100;
-    HR_QTY = 10000;
+    HR_QTY = 11000;
 
     // 1 byte por Coil para máxima simplicidad y rapidez de acceso
     coilsBuffer = Buffer.alloc(this.COILS_QTY);
@@ -57,6 +57,23 @@ class BufferManager
         if (addr < 0 || addr >= this.HR_QTY) return;
         this.hrBuffer.writeUInt16BE(value & 0xffff, addr * 2);
         //console.log(`[UInt16 Write] Dir ${addr} -> ${value}`);
+    }
+
+    // --- BIT INDIVIDUAL DENTRO DE UN HOLDING REGISTER (0-15) ---
+    getBit(addr: number, bit: number): boolean
+    {
+        if (addr < 0 || addr >= this.HR_QTY) return false;
+        const word = this.hrBuffer.readUInt16BE(addr * 2);
+        return ((word >> bit) & 1) === 1;
+    }
+
+    setBit(addr: number, bit: number, value: boolean): void
+    {
+        if (addr < 0 || addr >= this.HR_QTY) return;
+        const word = this.hrBuffer.readUInt16BE(addr * 2);
+        const newWord = value ? (word | (1 << bit)) : (word & ~(1 << bit));
+        this.hrBuffer.writeUInt16BE(newWord & 0xffff, addr * 2);
+        //console.log(`[Bit Write] Dir ${addr}.${bit} -> ${value}`);
     }
 
     // --- FLOTANTES DE 32 BITS (Float32 / IEEE 754) ---

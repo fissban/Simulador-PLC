@@ -30,7 +30,7 @@ const MIME_TYPES: Record<string, string> = {
     ".txt": "text/plain; charset=utf-8"
 };
 
-function getModbusValue(address: number, type: RegisterTypes): string
+function getModbusValue(address: number, type: RegisterTypes, bit?: number): string
 {
     switch (type)
     {
@@ -43,12 +43,15 @@ function getModbusValue(address: number, type: RegisterTypes): string
         case RegisterTypes.HOLDING_REGISTER_FLOAT:
             return bufferManager.getFloat32(address).toFixed(4);
 
+        case RegisterTypes.HOLDING_REGISTER_BIT:
+            return String(bufferManager.getBit(address, bit ?? 0));
+
         default:
             return "N/A";
     }
 }
 
-function formatAddress(address: number, type: RegisterTypes): string
+function formatAddress(address: number, type: RegisterTypes, bit?: number): string
 {
     const paddedAddress = String(address).padStart(4, "0");
 
@@ -63,6 +66,9 @@ function formatAddress(address: number, type: RegisterTypes): string
         case RegisterTypes.HOLDING_REGISTER_FLOAT:
             return `HRF${paddedAddress}`;
 
+        case RegisterTypes.HOLDING_REGISTER_BIT:
+            return `HR${paddedAddress}.${bit ?? 0}`;
+
         default:
             return paddedAddress;
     }
@@ -72,7 +78,7 @@ function buildRows(): RegisterRow[]
 {
     return addressData.getAll().map((register) => ({
         address: register.address,
-        formattedAddress: formatAddress(register.address, register.type),
+        formattedAddress: formatAddress(register.address, register.type, register.bit),
         type: register.type,
         name: register.name,
         description: register.description ?? "",
@@ -80,7 +86,7 @@ function buildRows(): RegisterRow[]
         runtimeFunction: register.runtimeFunction ?? "",
         expression: register.expression ?? "",
         configValue: String(register.value),
-        modbusValue: getModbusValue(register.address, register.type)
+        modbusValue: getModbusValue(register.address, register.type, register.bit)
     }));
 }
 
@@ -185,11 +191,11 @@ export function startWebServer(): void
 
     webServer.on("error", (error: Error) =>
     {
-        console.error("Error del servidor Web:", error.message);
+        console.error("[Web][ERROR] Error del servidor:", error.message);
     });
 
     webServer.listen(port, host, () =>
     {
-        console.log(`Servidor Web iniciado en http://${host}:${port}`);
+        console.log(`[Web] Servidor iniciado en http://${host}:${port}`);
     });
 }
