@@ -1,0 +1,8 @@
+body { font-family: Arial, sans-serif; margin: 16px; background: #111827; color: #e5e7eb; }
+h1 { margin: 0 0 8px; }
+.meta { margin-bottom: 12px; color: #9ca3af; }
+table { width: 100%; border-collapse: collapse; background: #1f2937; }
+th, td { border: 1px solid #374151; padding: 8px; text-align: left; font-size: 14px; }
+th { position: sticky; top: 0; background: #111827; }
+tr:nth-child(even) { background: #243244; }
+code { background: #0b1220; padding: 2px 4px; border-radius: 4px; }

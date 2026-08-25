@@ -1,0 +1,593 @@
+{
+    "registers": [
+        {
+            "address": 0,
+            "type": "COIL",
+            "name": "EXAMPLE_MOTOR_START",
+            "value": false,
+            "description": "Bit de arranque del motor",
+            "writable": true
+        },
+        {
+            "address": 1,
+            "type": "COIL",
+            "name": "EXAMPLE_MOTOR_STOP",
+            "value": false,
+            "description": "Entrada de parada de emergencia"
+        },
+        {
+            "address": 10000,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA1_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,100)",
+            "writable": false
+        },
+        {
+            "address": 10002,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA2_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,10)",
+            "writable": false
+        },
+        {
+            "address": 10004,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA3_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(4,20)",
+            "writable": false
+        },
+        {
+            "address": 10006,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA4_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(-20,60)",
+            "writable": false
+        },
+        {
+            "address": 10008,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA5_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(20,120)",
+            "writable": false
+        },
+        {
+            "address": 10010,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA6_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,250)",
+            "writable": false
+        },
+        {
+            "address": 10012,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA7_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,400)",
+            "writable": false
+        },
+        {
+            "address": 10014,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA8_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,14)",
+            "writable": false
+        },
+        {
+            "address": 10016,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA9_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(6.5,8.5)",
+            "writable": false
+        },
+        {
+            "address": 10018,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA10_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,1000)",
+            "writable": false
+        },
+        {
+            "address": 10020,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA11_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,2000)",
+            "writable": false
+        },
+        {
+            "address": 10022,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA12_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,5000)",
+            "writable": false
+        },
+        {
+            "address": 10024,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA13_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,50)",
+            "writable": false
+        },
+        {
+            "address": 10026,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA14_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(30,90)",
+            "writable": false
+        },
+        {
+            "address": 10028,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA15_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(200,600)",
+            "writable": false
+        },
+        {
+            "address": 10030,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA16_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,1)",
+            "writable": false
+        },
+        {
+            "address": 10032,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA17_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,5)",
+            "writable": false
+        },
+        {
+            "address": 10034,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA18_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(-1,1)",
+            "writable": false
+        },
+        {
+            "address": 10036,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA19_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,24)",
+            "writable": false
+        },
+        {
+            "address": 10038,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA20_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(45,65)",
+            "writable": false
+        },
+        {
+            "address": 10040,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA21_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,300)",
+            "writable": false
+        },
+        {
+            "address": 10042,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA22_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,80)",
+            "writable": false
+        },
+        {
+            "address": 10044,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA23_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,30)",
+            "writable": false
+        },
+        {
+            "address": 10046,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA24_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,150)",
+            "writable": false
+        },
+        {
+            "address": 10048,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA25_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,2)",
+            "writable": false
+        },
+        {
+            "address": 10050,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA26_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(90,110)",
+            "writable": false
+        },
+        {
+            "address": 10052,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA27_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,12)",
+            "writable": false
+        },
+        {
+            "address": 10054,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA28_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,60)",
+            "writable": false
+        },
+        {
+            "address": 10056,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA29_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(-40,40)",
+            "writable": false
+        },
+        {
+            "address": 10058,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA30_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(10,90)",
+            "writable": false
+        },
+        {
+            "address": 10060,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA31_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(1,9)",
+            "writable": false
+        },
+        {
+            "address": 10062,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA32_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,75)",
+            "writable": false
+        },
+        {
+            "address": 10064,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA33_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(5,35)",
+            "writable": false
+        },
+        {
+            "address": 10066,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA34_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,18)",
+            "writable": false
+        },
+        {
+            "address": 10068,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA35_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(100,300)",
+            "writable": false
+        },
+        {
+            "address": 10070,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA36_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,700)",
+            "writable": false
+        },
+        {
+            "address": 10072,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA37_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,3.5)",
+            "writable": false
+        },
+        {
+            "address": 10074,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA38_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,9)",
+            "writable": false
+        },
+        {
+            "address": 10076,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA39_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(250,450)",
+            "writable": false
+        },
+        {
+            "address": 10078,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA40_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,40)",
+            "writable": false
+        },
+        {
+            "address": 10080,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA41_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(15,25)",
+            "writable": false
+        },
+        {
+            "address": 10082,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA42_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,160)",
+            "writable": false
+        },
+        {
+            "address": 10084,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA43_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(2,12)",
+            "writable": false
+        },
+        {
+            "address": 10086,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA44_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,95)",
+            "writable": false
+        },
+        {
+            "address": 10088,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA45_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(50,150)",
+            "writable": false
+        },
+        {
+            "address": 10090,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA46_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(-10,10)",
+            "writable": false
+        },
+        {
+            "address": 10092,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA47_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,220)",
+            "writable": false
+        },
+        {
+            "address": 10094,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA48_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,0.8)",
+            "writable": false
+        },
+        {
+            "address": 10096,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA49_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(0,130)",
+            "writable": false
+        },
+        {
+            "address": 10098,
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA50_VALOR_CRUDO",
+            "value": 0,
+            "description": "Señal simulada de Instrumento Analógico",
+            "runtimeFunction": "sine(300,900)",
+            "writable": false
+        }
+        
+    ],
+    "registerTemplates": [
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_VALOR",
+            "defaultValue": 0,
+            "description": "Salida del Instrumento Analogica ya procesada {n}",
+            "writable": true,
+            "expression": "scale(#OA{n}_VALOR_CRUDO, #OA{n}_RANGO_MIN, #OA{n}_RANGO_MAX, #OA{n}_INGENIERIA_MIN, #OA{n}_INGENIERIA_MAX)",
+            "startAddress": 5000,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER",
+            "name": "OA{n}_CONFIG",
+            "defaultValue": 0,
+            "description": "Configuración de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 100,
+            "step": 1,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER",
+            "name": "OA{n}_ESTADO",
+            "defaultValue": 0,
+            "description": "Estado de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 2372,
+            "step": 1,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_RANGO_MIN",
+            "defaultValue": 0,
+            "description": "Rango mínimo de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 340,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_RANGO_MAX",
+            "defaultValue": 10,
+            "description": "Rango máximo de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 440,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_INGENIERIA_MIN",
+            "defaultValue": 10,
+            "description": "Rango ingeniería mínima de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 540,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_INGENIERIA_MAX",
+            "defaultValue": 100,
+            "description": "Rango ingeniería máxima de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 640,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_SET_POINT_HH",
+            "defaultValue": 0,
+            "description": "Set point HH de alarma de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 740,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_SET_POINT_H",
+            "defaultValue": 0,
+            "description": "Set point H de alarma de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 840,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_SET_POINT_L",
+            "defaultValue": 0,
+            "description": "Set point L de alarma de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 940,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_SET_POINT_LL",
+            "defaultValue": 0,
+            "description": "Set point LL de alarma de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 1040,
+            "step": 2,
+            "count": 50
+        },
+        {
+            "type": "HOLDING_REGISTER_FLOAT",
+            "name": "OA{n}_DEAD_BAND",
+            "defaultValue": 0,
+            "description": "Dead band de la señal de salida analógica {n}",
+            "writable": true,
+            "startAddress": 1140,
+            "step": 2,
+            "count": 50
+        }
+    ]
+}

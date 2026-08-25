@@ -1,0 +1,35 @@
+{
+    "name": "plc-simulator",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Simulador PLC con servidor Modbus TCP",
+    "main": "dist/index.js",
+    "scripts": {
+        "build:server": "tsc -p tsconfig.json",
+        "build:web": "vite build",
+        "build": "npm run build:server && npm run build:web",
+        "start:server": "node dist/index.js",
+        "start:web": "vite preview --host 0.0.0.0 --port 4173",
+        "dev:server": "tsx src/index.ts",
+        "dev:web": "vite"
+    },
+    "keywords": [
+        "plc",
+        "modbus",
+        "simulator",
+        "typescript"
+    ],
+    "license": "UNLICENSED",
+    "dependencies": {
+        "modbus-serial": "^8.0.23",
+        "solid-js": "^1.9.15",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.1",
+        "vite": "^6.0.11",
+        "vite-plugin-solid": "^2.11.1",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.2"
+    }
+}
