@@ -150,8 +150,8 @@ class ExpressionManager
      * Soporta:
      * - referencias por nombre: `#NOMBRE_REGISTRO`
      * - operadores aritméticos: +, -, *, /
-     * - comparadores: >, <, >=, <=, ==, !=
-    * - operador lógico AND: &&
+    * - comparadores: >, <, >=, <=, ==, !=
+    * - operadores lógicos: AND, OR
      * - funciones declaradas en `functionsCatalog`
      */
     private evaluate(expression: string): number
@@ -162,7 +162,21 @@ class ExpressionManager
         /** Punto de entrada del parser (precedencia más baja). */
         const parseExpression = (): number =>
         {
-            return parseLogicalAnd();
+            return parseLogicalOr();
+        };
+
+        /** Parsea el operador lógico OR con menor precedencia que AND. */
+        const parseLogicalOr = (): number =>
+        {
+            let value = parseLogicalAnd();
+
+            while (matchOperator("OR"))
+            {
+                const right = parseLogicalAnd();
+                value = toBoolNumber(value >= 0.5 || right >= 0.5);
+            }
+
+            return value;
         };
 
         /** Parsea el operador lógico AND después de resolver comparaciones. */
@@ -170,7 +184,7 @@ class ExpressionManager
         {
             let value = parseComparison();
 
-            while (matchOperator("&&"))
+            while (matchOperator("AND"))
             {
                 const right = parseComparison();
                 value = toBoolNumber(value >= 0.5 && right >= 0.5);
@@ -405,7 +419,7 @@ class ExpressionManager
 
             if (expression.slice(cursor, cursor + 2) === "&&")
             {
-                tokens.push({ type: "operator", value: "&&" });
+                tokens.push({ type: "operator", value: "AND" });
                 cursor += 2;
                 continue;
             }
@@ -486,7 +500,11 @@ class ExpressionManager
                     end++;
                 }
 
-                tokens.push({ type: "identifier", value: expression.slice(cursor, end) });
+                const identifier = expression.slice(cursor, end);
+                tokens.push({
+                    type: identifier === "AND" || identifier === "OR" ? "operator" : "identifier",
+                    value: identifier
+                });
                 cursor = end;
                 continue;
             }

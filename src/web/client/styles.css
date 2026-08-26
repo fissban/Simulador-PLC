@@ -27,7 +27,7 @@ button, input, select, textarea {
 .app-shell {
     width: calc(100% - 32px);
     margin: 0 auto;
-    padding: 24px 0 32px;
+    padding: 24px 0 0;
 }
 
 .hero {
@@ -225,7 +225,7 @@ h1 {
 
 .table-scroll {
     overflow: auto;
-    max-height: calc(100vh - 240px);
+    max-height: calc(100vh - 389px);
 }
 
 table {

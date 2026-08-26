@@ -57,7 +57,7 @@
             "type": "HOLDING_REGISTER_BIT",
             "group": "analogicos",
             "name": "IA{n}_ALARMA_HABILITADA_LOLO",
-            "defaultValue": false,
+            "defaultValue": true,
             "description": "Bit 1 de IA{n}_CONFIG: alarma LoLo habilitada",
             "writable": true,
             "startAddress": 101,
@@ -69,7 +69,7 @@
             "type": "HOLDING_REGISTER_BIT",
             "group": "analogicos",
             "name": "IA{n}_ALARMA_HABILITADA_LO",
-            "defaultValue": false,
+            "defaultValue": true,
             "description": "Bit 2 de IA{n}_CONFIG: alarma Lo habilitada",
             "writable": true,
             "startAddress": 101,
@@ -81,7 +81,7 @@
             "type": "HOLDING_REGISTER_BIT",
             "group": "analogicos",
             "name": "IA{n}_ALARMA_HABILITADA_HI",
-            "defaultValue": false,
+            "defaultValue": true,
             "description": "Bit 3 de IA{n}_CONFIG: alarma Hi habilitada",
             "writable": true,
             "startAddress": 101,
@@ -93,7 +93,7 @@
             "type": "HOLDING_REGISTER_BIT",
             "group": "analogicos",
             "name": "IA{n}_ALARMA_HABILITADA_HIHI",
-            "defaultValue": false,
+            "defaultValue": true,
             "description": "Bit 4 de IA{n}_CONFIG: alarma HiHi habilitada",
             "writable": true,
             "startAddress": 101,
@@ -123,7 +123,7 @@
             "step": 1,
             "count": 50,
             "bit": 1,
-            "expression": "#IA{n}_ALARMA_HABILITADA_LOLO && (#IA{n}_VALOR <= #IA{n}_SET_POINT_LL)"
+            "expression": "#IA{n}_ALARMA_HABILITADA_LOLO AND (#IA{n}_VALOR <= #IA{n}_SET_POINT_LL)"
         },
         {
             "type": "HOLDING_REGISTER_BIT",
@@ -136,7 +136,7 @@
             "step": 1,
             "count": 50,
             "bit": 2,
-            "expression": "#IA{n}_ALARMA_HABILITADA_LO && (#IA{n}_VALOR <= #IA{n}_SET_POINT_L)"
+            "expression": "#IA{n}_ALARMA_HABILITADA_LO AND (#IA{n}_VALOR <= #IA{n}_SET_POINT_L)"
         },
         {
             "type": "HOLDING_REGISTER_BIT",
@@ -149,7 +149,7 @@
             "step": 1,
             "count": 50,
             "bit": 3,
-            "expression": "#IA{n}_ALARMA_HABILITADA_HI && (#IA{n}_VALOR >= #IA{n}_SET_POINT_H)"
+            "expression": "#IA{n}_ALARMA_HABILITADA_HI AND (#IA{n}_VALOR >= #IA{n}_SET_POINT_H)"
         },
         {
             "type": "HOLDING_REGISTER_BIT",
@@ -162,7 +162,7 @@
             "step": 1,
             "count": 50,
             "bit": 4,
-            "expression": "#IA{n}_ALARMA_HABILITADA_HIHI && (#IA{n}_VALOR >= #IA{n}_SET_POINT_HH)"
+            "expression": "#IA{n}_ALARMA_HABILITADA_HIHI AND (#IA{n}_VALOR >= #IA{n}_SET_POINT_HH)"
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
@@ -212,7 +212,7 @@
             "type": "HOLDING_REGISTER_FLOAT",
             "group": "analogicos",
             "name": "IA{n}_SET_POINT_HH",
-            "defaultValue": 0,
+            "defaultValue": 500,
             "description": "Set point HH de alarma de la señal de entrada analógica {n}",
             "writable": true,
             "startAddress": 740,
@@ -223,7 +223,7 @@
             "type": "HOLDING_REGISTER_FLOAT",
             "group": "analogicos",
             "name": "IA{n}_SET_POINT_H",
-            "defaultValue": 0,
+            "defaultValue": 200,
             "description": "Set point H de alarma de la señal de entrada analógica {n}",
             "writable": true,
             "startAddress": 840,
@@ -234,7 +234,7 @@
             "type": "HOLDING_REGISTER_FLOAT",
             "group": "analogicos",
             "name": "IA{n}_SET_POINT_L",
-            "defaultValue": 0,
+            "defaultValue": 100,
             "description": "Set point L de alarma de la señal de entrada analógica {n}",
             "writable": true,
             "startAddress": 940,
@@ -245,7 +245,7 @@
             "type": "HOLDING_REGISTER_FLOAT",
             "group": "analogicos",
             "name": "IA{n}_SET_POINT_LL",
-            "defaultValue": 0,
+            "defaultValue": 20,
             "description": "Set point LL de alarma de la señal de entrada analógica {n}",
             "writable": true,
             "startAddress": 1040,
