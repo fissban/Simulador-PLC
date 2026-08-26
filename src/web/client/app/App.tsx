@@ -21,6 +21,7 @@ type RegistersResponse = {
 };
 
 const POLL_INTERVAL_MS = 1000;
+const BRAND_NAME = "Dobby Modbus Engine";
 const groups: Array<{key: RegisterGroup; label: string}> = [
 	{key: "analogicos", label: "Analógicos"},
 	{key: "digitales", label: "Digitales"},
@@ -45,6 +46,7 @@ export function App() {
 	const [searchText, setSearchText] = createSignal("");
 	const [status, setStatus] = createSignal("Conectando...");
 	const [lastUpdated, setLastUpdated] = createSignal<string | null>(null);
+	const [logoFailed, setLogoFailed] = createSignal(false);
 
 	const groupRows = createMemo(() => rows().filter((row) => row.group === selectedGroup()));
 	const visibleRows = createMemo(() => {
@@ -54,12 +56,7 @@ export function App() {
 			return groupRows();
 		}
 
-		return groupRows().filter((row) => [
-			row.formattedAddress,
-			row.type,
-			row.name,
-			row.description,
-		].some((value) => value.toLocaleLowerCase().includes(query)));
+		return groupRows().filter((row) => [row.formattedAddress, row.type, row.name, row.description].some((value) => value.toLocaleLowerCase().includes(query)));
 	});
 	const totalCount = createMemo(() => visibleRows().length);
 
@@ -94,15 +91,22 @@ export function App() {
 	});
 
 	createEffect(() => {
-		document.title = `Simulador PLC - ${totalCount()} registros`;
+		document.title = `${BRAND_NAME} - ${totalCount()} registros`;
 	});
 
 	return (
 		<main class="app-shell">
 			<header class="hero">
-				<div>
-					<p class="eyebrow">Simulador PLC</p>
-					<h1>Registros Modbus + AddressData</h1>
+				<div class="brand-block">
+					<div class="brand-mark" aria-hidden="true">
+						<Show when={!logoFailed()} fallback={<span class="brand-mark-fallback">PLC</span>}>
+							<img src="/logo.png" alt="" class="brand-logo" onError={() => setLogoFailed(true)} />
+						</Show>
+					</div>
+					<div>
+                        <h1>{BRAND_NAME}</h1>
+                        <p class="eyebrow">Sofware creado por Marco Faccio V1.0</p>
+					</div>
 				</div>
 				<div class="status-card">
 					<span class="status-dot" data-status={status()} />
@@ -110,37 +114,31 @@ export function App() {
 						<strong>{status()}</strong>
 						<p>
 							<Show when={lastUpdated()} fallback="Esperando primer refresco...">
-								Última actualización: {lastUpdated()}
+								<strong>Última actualización:</strong> {lastUpdated()}
 							</Show>
-						</p>
+                        </p>
+                        <p>
+                            <strong>Intervalo:</strong> {POLL_INTERVAL_MS} ms
+                        </p>
 					</div>
 				</div>
 			</header>
 
-			<section class="summary-bar">
-				<div>
-					<span class="summary-label">Registros del grupo</span>
-					<strong>{totalCount()}</strong>
-				</div>
-				<div>
-					<span class="summary-label">Intervalo</span>
-					<strong>{POLL_INTERVAL_MS} ms</strong>
-				</div>
-			</section>
-
 			<nav class="group-tabs" aria-label="Grupos de registros">
-				<For each={groups}>{(group) => (
-					<button
-						class="group-tab"
-						classList={{active: selectedGroup() === group.key}}
-						type="button"
-						aria-selected={selectedGroup() === group.key}
-						onClick={() => setSelectedGroup(group.key)}
-					>
-						<span>{group.label}</span>
-						<strong>{rows().filter((row) => row.group === group.key).length}</strong>
-					</button>
-				)}</For>
+				<For each={groups}>
+					{(group) => (
+						<button
+							class="group-tab"
+							classList={{active: selectedGroup() === group.key}}
+							type="button"
+							aria-selected={selectedGroup() === group.key}
+							onClick={() => setSelectedGroup(group.key)}
+						>
+							<span>{group.label}</span>
+							<strong>{rows().filter((row) => row.group === group.key).length}</strong>
+						</button>
+					)}
+				</For>
 			</nav>
 
 			<div class="search-bar">
@@ -154,7 +152,9 @@ export function App() {
 						placeholder="Address, type, name o description"
 					/>
 					<Show when={searchText()}>
-						<button class="clear-search" type="button" onClick={() => setSearchText("")}>Limpiar</button>
+						<button class="clear-search" type="button" onClick={() => setSearchText("")}>
+							Limpiar
+						</button>
 					</Show>
 				</div>
 			</div>
@@ -168,14 +168,23 @@ export function App() {
 							</tr>
 						</thead>
 						<tbody>
-							<Show when={visibleRows().length > 0} fallback={<tr><td class="empty-state" colSpan={columns.length}>No hay registros en este grupo.</td></tr>}>
-							<For each={visibleRows()}>
-								{(row) => (
+							<Show
+								when={visibleRows().length > 0}
+								fallback={
 									<tr>
-										<For each={columns}>{(column) => <td>{row[column.key]}</td>}</For>
+										<td class="empty-state" colSpan={columns.length}>
+											No hay registros en este grupo.
+										</td>
 									</tr>
-								)}
-							</For>
+								}
+							>
+								<For each={visibleRows()}>
+									{(row) => (
+										<tr>
+											<For each={columns}>{(column) => <td>{row[column.key]}</td>}</For>
+										</tr>
+									)}
+								</For>
 							</Show>
 						</tbody>
 					</table>
