@@ -77,24 +77,21 @@ function formatAddress(address: number, type: RegisterTypes, bit?: number): stri
 
 function buildRows(): RegisterRow[]
 {
-    return addressData.getAll().map((register) => ({
-        address: register.address,
-        formattedAddress: formatAddress(register.address, register.type, register.bit),
-        type: register.type,
-        group: register.group,
-        name: register.name,
-        description: register.description ?? "",
-        writable: String(register.writable ?? false),
-        runtimeFunction: register.runtimeFunction ?? "",
-        expression: register.expression ?? "",
-        configValue: String(register.value),
-        modbusValue: getModbusValue(register.address, register.type, register.bit)
-    }));
-}
-
-function sortRowsByAddress(rows: RegisterRow[]): RegisterRow[]
-{
-    return [...rows].sort((a, b) => a.address - b.address);
+    return addressData.getAll()
+        .map((register) => ({
+            address: register.address,
+            formattedAddress: formatAddress(register.address, register.type, register.bit),
+            type: register.type,
+            group: register.group,
+            name: register.name,
+            description: register.description ?? "",
+            writable: String(register.writable ?? false),
+            runtimeFunction: register.runtimeFunction ?? "",
+            expression: register.expression ?? "",
+            configValue: String(register.value),
+            modbusValue: getModbusValue(register.address, register.type, register.bit)
+        }))
+        .sort((a, b) => a.address - b.address);
 }
 
 function getSafePublicFilePath(requestPath: string): string | null
@@ -159,7 +156,7 @@ export function startWebServer(): void
 
         if (requestUrl.pathname === "/api/registers")
         {
-            const rows = sortRowsByAddress(buildRows());
+            const rows = buildRows();
             res.writeHead(200, {
                 "Content-Type": "application/json; charset=utf-8",
                 "Cache-Control": "no-store"
