@@ -22,7 +22,7 @@
         {
             "type": "HOLDING_REGISTER_FLOAT",
             "group": "analogicos",
-            "name": "IA{n}_VALOR_CRUDO",
+            "name": "IA{n}_INPUT",
             "defaultValue": 0,
             "description": "Señal simulada de Instrumento Analógico {n}",
             "writable": false,

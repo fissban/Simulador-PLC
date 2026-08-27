@@ -1,5 +1,5 @@
 {
-    "IA{n}_VALOR_CRUDO": [
+    "IA{n}_INPUT": [
         { "n": 1, "runtimeFunction": "sine(0,100)" },
         { "n": 2, "runtimeFunction": "sine(0,10)" },
         { "n": 3, "runtimeFunction": "sine(4,20)" },
