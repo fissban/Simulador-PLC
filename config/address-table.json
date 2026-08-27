@@ -51,55 +51,37 @@
             "writable": true,
             "startAddress": 101,
             "step": 1,
-            "count": 50
-        },
-        {
-            "type": "HOLDING_REGISTER_BIT",
-            "group": "analogicos",
-            "name": "IA{n}_ALARMA_HABILITADA_LOLO",
-            "defaultValue": true,
-            "description": "Bit 1 de IA{n}_CONFIG: alarma LoLo habilitada",
-            "writable": true,
-            "startAddress": 101,
-            "step": 1,
             "count": 50,
-            "bit": 1
-        },
-        {
-            "type": "HOLDING_REGISTER_BIT",
-            "group": "analogicos",
-            "name": "IA{n}_ALARMA_HABILITADA_LO",
-            "defaultValue": true,
-            "description": "Bit 2 de IA{n}_CONFIG: alarma Lo habilitada",
-            "writable": true,
-            "startAddress": 101,
-            "step": 1,
-            "count": 50,
-            "bit": 2
-        },
-        {
-            "type": "HOLDING_REGISTER_BIT",
-            "group": "analogicos",
-            "name": "IA{n}_ALARMA_HABILITADA_HI",
-            "defaultValue": true,
-            "description": "Bit 3 de IA{n}_CONFIG: alarma Hi habilitada",
-            "writable": true,
-            "startAddress": 101,
-            "step": 1,
-            "count": 50,
-            "bit": 3
-        },
-        {
-            "type": "HOLDING_REGISTER_BIT",
-            "group": "analogicos",
-            "name": "IA{n}_ALARMA_HABILITADA_HIHI",
-            "defaultValue": true,
-            "description": "Bit 4 de IA{n}_CONFIG: alarma HiHi habilitada",
-            "writable": true,
-            "startAddress": 101,
-            "step": 1,
-            "count": 50,
-            "bit": 4
+            "bitfields": [
+                {
+                    "name": "IA{n}_ALARMA_HABILITADA_LOLO",
+                    "defaultValue": true,
+                    "description": "Bit 1 de IA{n}_CONFIG: alarma LoLo habilitada",
+                    "writable": true,
+                    "bit": 1
+                },
+                {
+                    "name": "IA{n}_ALARMA_HABILITADA_LO",
+                    "defaultValue": true,
+                    "description": "Bit 2 de IA{n}_CONFIG: alarma Lo habilitada",
+                    "writable": true,
+                    "bit": 2
+                },
+                {
+                    "name": "IA{n}_ALARMA_HABILITADA_HI",
+                    "defaultValue": true,
+                    "description": "Bit 3 de IA{n}_CONFIG: alarma Hi habilitada",
+                    "writable": true,
+                    "bit": 3
+                },
+                {
+                    "name": "IA{n}_ALARMA_HABILITADA_HIHI",
+                    "defaultValue": true,
+                    "description": "Bit 4 de IA{n}_CONFIG: alarma HiHi habilitada",
+                    "writable": true,
+                    "bit": 4
+                }
+            ]
         },
         {
             "type": "HOLDING_REGISTER",
@@ -110,59 +92,41 @@
             "writable": false,
             "startAddress": 2372,
             "step": 1,
-            "count": 50
-        },
-        {
-            "type": "HOLDING_REGISTER_BIT",
-            "group": "analogicos",
-            "name": "IA{n}_ALARMA_LOLO",
-            "defaultValue": false,
-            "description": "Bit 1 de IA{n}_ESTADO: alarma LoLo activa",
-            "writable": false,
-            "startAddress": 2372,
-            "step": 1,
             "count": 50,
-            "bit": 1,
-            "expression": "#IA{n}_ALARMA_HABILITADA_LOLO AND (#IA{n}_VALOR <= #IA{n}_SET_POINT_LL)"
-        },
-        {
-            "type": "HOLDING_REGISTER_BIT",
-            "group": "analogicos",
-            "name": "IA{n}_ALARMA_LO",
-            "defaultValue": false,
-            "description": "Bit 2 de IA{n}_ESTADO: alarma Lo activa",
-            "writable": false,
-            "startAddress": 2372,
-            "step": 1,
-            "count": 50,
-            "bit": 2,
-            "expression": "#IA{n}_ALARMA_HABILITADA_LO AND (#IA{n}_VALOR <= #IA{n}_SET_POINT_L)"
-        },
-        {
-            "type": "HOLDING_REGISTER_BIT",
-            "group": "analogicos",
-            "name": "IA{n}_ALARMA_HI",
-            "defaultValue": false,
-            "description": "Bit 3 de IA{n}_ESTADO: alarma Hi activa",
-            "writable": false,
-            "startAddress": 2372,
-            "step": 1,
-            "count": 50,
-            "bit": 3,
-            "expression": "#IA{n}_ALARMA_HABILITADA_HI AND (#IA{n}_VALOR >= #IA{n}_SET_POINT_H)"
-        },
-        {
-            "type": "HOLDING_REGISTER_BIT",
-            "group": "analogicos",
-            "name": "IA{n}_ALARMA_HIHI",
-            "defaultValue": false,
-            "description": "Bit 4 de IA{n}_ESTADO: alarma HiHi activa",
-            "writable": false,
-            "startAddress": 2372,
-            "step": 1,
-            "count": 50,
-            "bit": 4,
-            "expression": "#IA{n}_ALARMA_HABILITADA_HIHI AND (#IA{n}_VALOR >= #IA{n}_SET_POINT_HH)"
+            "bitfields": [
+                {
+                    "name": "IA{n}_ALARMA_LOLO",
+                    "defaultValue": false,
+                    "description": "Bit 1 de IA{n}_ESTADO: alarma LoLo activa",
+                    "writable": false,
+                    "bit": 1,
+                    "expression": "#IA{n}_ALARMA_HABILITADA_LOLO AND (#IA{n}_VALOR <= #IA{n}_SET_POINT_LL)"
+                },
+                {
+                    "name": "IA{n}_ALARMA_LO",
+                    "defaultValue": false,
+                    "description": "Bit 2 de IA{n}_ESTADO: alarma Lo activa",
+                    "writable": false,
+                    "bit": 2,
+                    "expression": "#IA{n}_ALARMA_HABILITADA_LO AND (#IA{n}_VALOR <= #IA{n}_SET_POINT_L)"
+                },
+                {
+                    "name": "IA{n}_ALARMA_HI",
+                    "defaultValue": false,
+                    "description": "Bit 3 de IA{n}_ESTADO: alarma Hi activa",
+                    "writable": false,
+                    "bit": 3,
+                    "expression": "#IA{n}_ALARMA_HABILITADA_HI AND (#IA{n}_VALOR >= #IA{n}_SET_POINT_H)"
+                },
+                {
+                    "name": "IA{n}_ALARMA_HIHI",
+                    "defaultValue": false,
+                    "description": "Bit 4 de IA{n}_ESTADO: alarma HiHi activa",
+                    "writable": false,
+                    "bit": 4,
+                    "expression": "#IA{n}_ALARMA_HABILITADA_HIHI AND (#IA{n}_VALOR >= #IA{n}_SET_POINT_HH)"
+                }
+            ]
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",

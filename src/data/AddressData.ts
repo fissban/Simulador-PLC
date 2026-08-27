@@ -56,6 +56,19 @@ interface RegisterTemplate
     expression?: string;
     /** Índice de bit (0-15) usado solo cuando type es HOLDING_REGISTER_BIT. */
     bit?: number;
+    /** Definición declarativa de bits hijos para registros contenedores. */
+    bitfields?: RegisterTemplateBitfield[];
+}
+
+interface RegisterTemplateBitfield
+{
+    name: string;
+    bit: number;
+    defaultValue?: number | boolean;
+    description?: string;
+    writable?: boolean;
+    runtimeFunction?: string;
+    expression?: string;
 }
 
 class AddressData
@@ -125,6 +138,37 @@ class AddressData
                         continue;
                     }
                     this.table.set(register.name, register);
+
+                    // Expandir bitfields declarativos cuando el template los define
+                    for (const bitfield of template.bitfields || [])
+                    {
+                        const bitfieldName = bitfield.name.replaceAll('{n}', templateIndexText);
+                        const bitfieldDescription = bitfield.description?.replaceAll('{n}', templateIndexText);
+                        const bitfieldExpression = bitfield.expression?.replaceAll('{n}', templateIndexText);
+                        const bitfieldOverride = simulationProfileData.getOverride(bitfield.name, templateIndex);
+
+                        const bitfieldRegister: AddressRegister = {
+                            address: template.startAddress + i * template.step,
+                            type: RegisterTypes.HOLDING_REGISTER_BIT,
+                            group: template.group,
+                            name: bitfieldName,
+                            value: bitfieldOverride?.value ?? bitfield.defaultValue ?? template.defaultValue,
+                            description: bitfieldDescription,
+                            writable: bitfield.writable ?? template.writable,
+                            runtimeFunction: bitfieldOverride?.runtimeFunction ?? bitfield.runtimeFunction,
+                            expression: bitfieldExpression,
+                            bit: bitfield.bit
+                        };
+
+                        // se valida si el registro ya existe en la tabla antes de agregarlo
+                        if (this.table.has(bitfieldRegister.name))
+                        {
+                            console.warn(`[AddressData][WARN] Registro duplicado: ${bitfieldRegister.name}. Se omite.`);
+                            continue;
+                        }
+
+                        this.table.set(bitfieldRegister.name, bitfieldRegister);
+                    }
                 }
             }
 
