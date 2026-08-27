@@ -18,10 +18,10 @@
             "description": "Entrada de parada de emergencia"
         }
     ],
-    "registerTemplates": [
+    "registerTemplates": {
+        "analogicos": [
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_INPUT",
             "defaultValue": 0,
             "description": "Señal simulada de Instrumento Analógico {n}",
@@ -32,22 +32,20 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_VALOR",
             "defaultValue": 0,
             "description": "Entrada del Instrumento Analógico ya procesada {n}",
             "writable": true,
-            "expression": "scale(#IA{n}_VALOR_CRUDO, #IA{n}_RANGO_MIN, #IA{n}_RANGO_MAX, #IA{n}_INGENIERIA_MIN, #IA{n}_INGENIERIA_MAX)",
+            "expression": "scale(#IA{n}_INPUT, #IA{n}_RANGO_MIN, #IA{n}_RANGO_MAX, #IA{n}_INGENIERIA_MIN, #IA{n}_INGENIERIA_MAX)",
             "startAddress": 5000,
             "step": 2,
             "count": 50
         },
         {
             "type": "HOLDING_REGISTER",
-            "group": "analogicos",
             "name": "IA{n}_CONFIG",
             "defaultValue": 0,
-            "description": "Configuración de la señal de entrada analógica {n}",
+            "description": "Configuración de las alarmas del instrumento analógico {n}",
             "writable": true,
             "startAddress": 101,
             "step": 1,
@@ -55,40 +53,31 @@
             "bitfields": [
                 {
                     "name": "IA{n}_ALARMA_HABILITADA_LOLO",
-                    "defaultValue": true,
                     "description": "Bit 1 de IA{n}_CONFIG: alarma LoLo habilitada",
-                    "writable": true,
                     "bit": 1
                 },
                 {
                     "name": "IA{n}_ALARMA_HABILITADA_LO",
-                    "defaultValue": true,
                     "description": "Bit 2 de IA{n}_CONFIG: alarma Lo habilitada",
-                    "writable": true,
                     "bit": 2
                 },
                 {
                     "name": "IA{n}_ALARMA_HABILITADA_HI",
-                    "defaultValue": true,
                     "description": "Bit 3 de IA{n}_CONFIG: alarma Hi habilitada",
-                    "writable": true,
                     "bit": 3
                 },
                 {
                     "name": "IA{n}_ALARMA_HABILITADA_HIHI",
-                    "defaultValue": true,
                     "description": "Bit 4 de IA{n}_CONFIG: alarma HiHi habilitada",
-                    "writable": true,
                     "bit": 4
                 }
             ]
         },
         {
             "type": "HOLDING_REGISTER",
-            "group": "analogicos",
             "name": "IA{n}_ESTADO",
             "defaultValue": 0,
-            "description": "Estado de la señal de entrada analógica {n} (word contenedora de bits de alarma)",
+            "description": "Estado de las alarmas del instrumento analógico {n}",
             "writable": false,
             "startAddress": 2372,
             "step": 1,
@@ -96,33 +85,25 @@
             "bitfields": [
                 {
                     "name": "IA{n}_ALARMA_LOLO",
-                    "defaultValue": false,
                     "description": "Bit 1 de IA{n}_ESTADO: alarma LoLo activa",
-                    "writable": false,
                     "bit": 1,
                     "expression": "#IA{n}_ALARMA_HABILITADA_LOLO AND (#IA{n}_VALOR <= #IA{n}_SET_POINT_LL)"
                 },
                 {
                     "name": "IA{n}_ALARMA_LO",
-                    "defaultValue": false,
                     "description": "Bit 2 de IA{n}_ESTADO: alarma Lo activa",
-                    "writable": false,
                     "bit": 2,
                     "expression": "#IA{n}_ALARMA_HABILITADA_LO AND (#IA{n}_VALOR <= #IA{n}_SET_POINT_L)"
                 },
                 {
                     "name": "IA{n}_ALARMA_HI",
-                    "defaultValue": false,
                     "description": "Bit 3 de IA{n}_ESTADO: alarma Hi activa",
-                    "writable": false,
                     "bit": 3,
                     "expression": "#IA{n}_ALARMA_HABILITADA_HI AND (#IA{n}_VALOR >= #IA{n}_SET_POINT_H)"
                 },
                 {
                     "name": "IA{n}_ALARMA_HIHI",
-                    "defaultValue": false,
                     "description": "Bit 4 de IA{n}_ESTADO: alarma HiHi activa",
-                    "writable": false,
                     "bit": 4,
                     "expression": "#IA{n}_ALARMA_HABILITADA_HIHI AND (#IA{n}_VALOR >= #IA{n}_SET_POINT_HH)"
                 }
@@ -130,7 +111,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_RANGO_MIN",
             "defaultValue": 0,
             "description": "Rango mínimo de la señal de entrada analógica {n}",
@@ -141,7 +121,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_RANGO_MAX",
             "defaultValue": 10,
             "description": "Rango máximo de la señal de entrada analógica {n}",
@@ -152,7 +131,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_INGENIERIA_MIN",
             "defaultValue": 10,
             "description": "Rango ingeniería mínima de la señal de entrada analógica {n}",
@@ -163,7 +141,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_INGENIERIA_MAX",
             "defaultValue": 100,
             "description": "Rango ingeniería máxima de la señal de entrada analógica {n}",
@@ -174,7 +151,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_SET_POINT_HH",
             "defaultValue": 500,
             "description": "Set point HH de alarma de la señal de entrada analógica {n}",
@@ -185,7 +161,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_SET_POINT_H",
             "defaultValue": 200,
             "description": "Set point H de alarma de la señal de entrada analógica {n}",
@@ -196,7 +171,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_SET_POINT_L",
             "defaultValue": 100,
             "description": "Set point L de alarma de la señal de entrada analógica {n}",
@@ -207,7 +181,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_SET_POINT_LL",
             "defaultValue": 20,
             "description": "Set point LL de alarma de la señal de entrada analógica {n}",
@@ -218,7 +191,6 @@
         },
         {
             "type": "HOLDING_REGISTER_FLOAT",
-            "group": "analogicos",
             "name": "IA{n}_DEAD_BAND",
             "defaultValue": 0,
             "description": "Dead band de la señal de entrada analógica {n}",
@@ -227,5 +199,8 @@
             "step": 2,
             "count": 50
         }
-    ]
+        ],
+        "digitales": [],
+        "directos": []
+    }
 }

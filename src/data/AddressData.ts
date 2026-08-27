@@ -5,8 +5,10 @@ import { simulationProfileData } from './SimulationProfileData';
 interface AddressTable
 {
     registers: AddressRegister[];
-    registerTemplates?: RegisterTemplate[];
+    registerTemplates?: RegisterTemplate[] | RegisterTemplatesByGroup;
 }
+
+type RegisterTemplatesByGroup = Partial<Record<RegisterGroup, RegisterTemplate[]>>;
 
 export type RegisterGroup = "analogicos" | "digitales" | "directos";
 
@@ -44,7 +46,7 @@ export interface AddressRegister
 interface RegisterTemplate
 {
     type: RegisterTypes;
-    group: RegisterGroup;
+    group?: RegisterGroup;
     startAddress: number;
     step: number;
     count: number;
@@ -54,8 +56,6 @@ interface RegisterTemplate
     writable?: boolean;
     runtimeFunction?: string;
     expression?: string;
-    /** Índice de bit (0-15) usado solo cuando type es HOLDING_REGISTER_BIT. */
-    bit?: number;
     /** Definición declarativa de bits hijos para registros contenedores. */
     bitfields?: RegisterTemplateBitfield[];
 }
@@ -64,9 +64,7 @@ interface RegisterTemplateBitfield
 {
     name: string;
     bit: number;
-    defaultValue?: number | boolean;
     description?: string;
-    writable?: boolean;
     runtimeFunction?: string;
     expression?: string;
 }
@@ -84,6 +82,34 @@ class AddressData
     {
         const table = readFileSync(path, 'utf-8').replace(/^\uFEFF/, '');
         return JSON.parse(table);
+    }
+
+    private getRegisterTemplates(table: AddressTable): RegisterTemplate[]
+    {
+        const { registerTemplates } = table;
+
+        if (!registerTemplates)
+        {
+            return [];
+        }
+
+        if (Array.isArray(registerTemplates))
+        {
+            return registerTemplates;
+        }
+
+        const groupedTemplates: RegisterTemplate[] = [];
+        const groupNames: RegisterGroup[] = ['analogicos', 'digitales', 'directos'];
+
+        for (const groupName of groupNames)
+        {
+            for (const template of registerTemplates[groupName] || [])
+            {
+                groupedTemplates.push({ ...template, group: template.group ?? groupName });
+            }
+        }
+
+        return groupedTemplates;
     }
 
     public load(): void
@@ -105,7 +131,8 @@ class AddressData
                 this.table.set(register.name, register);
             }
             // Cargar registros a partir de plantillas
-            for (const template of table.registerTemplates || [])
+            const registerTemplates = this.getRegisterTemplates(table);
+            for (const template of registerTemplates)
             {
                 for (let i = 0; i < template.count; i++)
                 {
@@ -121,14 +148,13 @@ class AddressData
                     const register: AddressRegister = {
                         address: template.startAddress + i * template.step,
                         type: template.type,
-                        group: template.group,
+                        group: template.group ?? 'analogicos',
                         name: templateName,
                         value: override?.value ?? template.defaultValue,
                         description: templateDescription,
                         writable: template.writable,
                         runtimeFunction: override?.runtimeFunction ?? template.runtimeFunction,
-                        expression: templateExpression,
-                        bit: template.bit
+                        expression: templateExpression
                     };
 
                     // se valida si el registro ya existe en la tabla antes de agregarlo
@@ -150,11 +176,11 @@ class AddressData
                         const bitfieldRegister: AddressRegister = {
                             address: template.startAddress + i * template.step,
                             type: RegisterTypes.HOLDING_REGISTER_BIT,
-                            group: template.group,
+                            group: template.group ?? 'analogicos',
                             name: bitfieldName,
-                            value: bitfieldOverride?.value ?? bitfield.defaultValue ?? template.defaultValue,
+                            value: bitfieldOverride?.value ?? template.defaultValue,
                             description: bitfieldDescription,
-                            writable: bitfield.writable ?? template.writable,
+                            writable: template.writable,
                             runtimeFunction: bitfieldOverride?.runtimeFunction ?? bitfield.runtimeFunction,
                             expression: bitfieldExpression,
                             bit: bitfield.bit
