@@ -2,8 +2,7 @@ import ModbusRTU from "modbus-serial";
 import { serverConfigData } from "./../data/ServerConfigData";
 import { addressData, RegisterTypes } from "./../data/AddressData";
 import { bufferManager } from "./managers/BufferManager";
-import { expressionManager } from "./managers/ExpressionManager";
-import { runtimeFunctionManager } from "./managers/RuntimeFunctionManager";
+import { stToJavaScriptManager } from "./managers/StToJavaScriptManager";
 
 /**
  * Inicia el servidor Modbus TCP usando la tabla de direcciones del PLC simulado.
@@ -93,10 +92,7 @@ export function startModbusServer(): void
         
         setInterval(() =>
         {
-            // Ejecutar funciones de runtime para actualizar registros según sus expresiones definidas
-            runtimeFunctionManager.execute();
-            expressionManager.execute();
-            
+            stToJavaScriptManager.execute();
             // Aquí podrías agregar más lógica si es necesario, como logging o validaciones adicionales
 
         }, serverConfigData.getUpdateEveryMs());

@@ -1,8 +1,8 @@
 import { addressData } from "./data/AddressData";
 import { serverConfigData } from "./data/ServerConfigData";
 import { simulationProfileData } from "./data/SimulationProfileData";
-import { expressionManager } from "./simulator/managers/ExpressionManager";
-import { runtimeFunctionManager } from "./simulator/managers/RuntimeFunctionManager";
+import { stToJavaScriptManager } from "./simulator/managers/StToJavaScriptManager";
+import { stVariableAddressManager } from "./simulator/managers/StVariableAddressManager";
 import { startModbusServer } from "./simulator/server";
 import { startWebServer } from "./web/server";
 
@@ -26,8 +26,8 @@ function main(): void
         addressData.load();
 
         // Configura las funciones de runtime para los registros que las tengan definidas
-        runtimeFunctionManager.configure();
-        expressionManager.configure();
+        stVariableAddressManager.load();
+        stToJavaScriptManager.configure();
 
         // Inicia servidor web para visualizar registros y valores actuales.
         startWebServer();
