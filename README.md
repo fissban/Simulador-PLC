@@ -8,8 +8,7 @@ La interfaz web ahora está montada con **SolidJS + TypeScript** y se compila co
 
 - Servidor Modbus TCP esclavo.
 - Puerto por defecto `502` (configurable por JSON).
-- Tabla de direcciones cargada desde archivo `.json`.
-- Soporta `coil`, `discreteInput`, `holdingRegister`, `inputRegister`.
+- Memoria Modbus servida directamente por el simulador.
 
 ## Requisitos
 
@@ -36,8 +35,7 @@ Comandos claros:
 Web de monitoreo:
 
 - URL: `http://localhost:8080` (o el `webPort` configurado)
-- Muestra `addressData` + valor actual en memoria Modbus
-- Actualiza solo celdas que cambian (sin recargar toda la página)
+- Muestra el estado actual expuesto por la API del simulador
 
 ### Producción
 
@@ -62,24 +60,11 @@ Scripts principales:
 
 ## Configuración
 
-Por defecto se usa: `config/address-table.json`
-
 El archivo `config/server-config.json` define:
 
 - `host`: host de bind para Modbus y Web
 - `port`: puerto Modbus TCP
-- `updateEveryMs`: ciclo de actualización de funciones runtime
 - `webPort`: puerto del servidor web de monitoreo (default `8080`)
-
-También podés:
-
-- Pasar ruta por argumento:
-
-```bash
-npm run dev -- config/address-table.json
-```
-
-- O por variable de entorno `PLC_TABLE_PATH`.
 
 ## Estructura web
 
@@ -93,69 +78,4 @@ La interfaz web está separada por capas:
 
 En `npm run build`, la web se genera en `dist/web/public` y el servidor Node la sirve como SPA.
 
-## Formato JSON
-
-```json
-{
-  "unitId": 1,
-  "host": "0.0.0.0",
-  "port": 502,
-  "registers": [
-    {
-      "address": 100,
-      "type": "holdingRegister",
-      "name": "SPEED_SETPOINT",
-      "value": 1500,
-      "writable": true
-    },
-    {
-      "address": 200,
-      "type": "holdingRegisterFloat",
-      "name": "SIM_SINE_200",
-      "value": 0,
-      "runtimeFunction": "sine(0,100)",
-      "writable": false
-    }
-  ]
-}
-```
-
-## Funciones en runtime
-
-Podés asignar una función al registro con `runtimeFunction`.
-
-Funciones soportadas:
-
-- **`sine(min, max)`**: onda sinusoidal entre min y max (período 10s).
-- **`triangle(min, max)`**: onda triangular entre min y max (período 10s).
-- **`square(min, max)`**: onda cuadrada entre min y max (período 10s).
-- **`ramp(min, max)`**: rampa lineal de min a max que se repite (período 10s).
-- **`random(min, max)`**: valor aleatorio entre min y max en cada actualización.
-
-Ejemplos:
-
-```json
-{
-  "address": 200,
-  "type": "holdingRegisterFloat",
-  "name": "SIM_SINE",
-  "value": 0,
-  "runtimeFunction": "sine(0,100)"
-},
-{
-  "address": 201,
-  "type": "holdingRegisterFloat",
-  "name": "SIM_TRIANGLE",
-  "value": 0,
-  "runtimeFunction": "triangle(10,90)"
-},
-{
-  "address": 202,
-  "type": "holdingRegisterFloat",
-  "name": "SIM_RANDOM",
-  "value": 0,
-  "runtimeFunction": "random(-50,50)"
-}
-```
-
-El simulador actualiza esos registros periódicamente mientras corre.
+La lógica de simulación actual vive enteramente en código TypeScript.

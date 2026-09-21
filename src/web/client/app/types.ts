@@ -1,5 +1,5 @@
 export type RegisterGroup = "analogicos" | "digitales" | "directos";
-export type MainView = "modbus" | "st" | "st-monitor";
+export type MainView = "modbus";
 
 export type RegisterRow = {
     address: number;

@@ -1,55 +1,15 @@
 import ModbusRTU from "modbus-serial";
 import { serverConfigData } from "./../data/ServerConfigData";
-import { addressData, RegisterTypes } from "./../data/AddressData";
 import { bufferManager } from "./managers/BufferManager";
-import { stToJavaScriptManager } from "./managers/StToJavaScriptManager";
 
 /**
- * Inicia el servidor Modbus TCP usando la tabla de direcciones del PLC simulado.
+ * Inicia el servidor Modbus TCP usando la memoria actual del PLC simulado.
  *
  * - Usa `host`, `port` y `unitId` desde el JSON.
  * - Si no vienen definidos, aplica defaults: `0.0.0.0`, `502`, `1`.
  */
 export function startModbusServer(): void
 {
-
-    // ============================================================================
-    // INICIALIZACIÓN DE MEMORIA DESDE ADDRESSDATA
-    // ============================================================================
-    function initBuffersFromAddressData(): void
-    {
-        const registers = addressData.getAll();
-
-        for (const reg of registers)
-        {
-            switch (reg.type)
-            {
-                case RegisterTypes.COIL:
-                    bufferManager.setCoil(reg.address, Boolean(reg.value));
-                    break;
-
-                case RegisterTypes.HOLDING_REGISTER:
-                    bufferManager.setInt16(reg.address, Number(reg.value));
-                    break;
-
-                case RegisterTypes.HOLDING_REGISTER_FLOAT:
-                    bufferManager.setFloat32(reg.address, Number(reg.value));
-                    break;
-
-                case RegisterTypes.HOLDING_REGISTER_BIT:
-                    bufferManager.setBit(reg.address, reg.bit ?? 0, Boolean(reg.value));
-                    break;
-
-                default:
-                    console.warn(`[Modbus][WARN] Tipo no soportado o no reconocido (${reg.type}) en dir ${reg.address}`);
-            }
-        }
-
-        console.log(`[Modbus] Memoria cargada: ${registers.length} registros.`);
-    }
-    // ============================================================================
-    // MÉTODOS HELPER (GET / SET) PARA EL BUFFER
-    // ============================================================================
 
     // "vector" define los handlers que el servidor Modbus invoca en lecturas/escrituras.
     const vector =
@@ -87,15 +47,6 @@ export function startModbusServer(): void
     server.on("initialized", function ()
     {
         console.log(`[Modbus] Servidor TCP iniciado en ${serverData.host}:${serverData.port}`);
-        // Cargar la tabla antes de iniciar el servidor
-        initBuffersFromAddressData();
-        
-        setInterval(() =>
-        {
-            stToJavaScriptManager.execute();
-            // Aquí podrías agregar más lógica si es necesario, como logging o validaciones adicionales
-
-        }, serverConfigData.getUpdateEveryMs());
     });
 
 

@@ -1,18 +1,15 @@
 ﻿import {createEffect, createSignal} from "solid-js";
-import {StVariableMonitorView} from "./components/StVariableMonitorView";
-import {StructuredTextView} from "./components/StructuredTextView";
+import {ModbusMapView} from "./components/ModbusMapView";
 import type {MainView} from "./types";
 
 const BRAND_NAME = "Dobby Modbus Engine";
 
 export function App() {
-	const [activeView, setActiveView] = createSignal<MainView>("st");
+	const [activeView] = createSignal<MainView>("modbus");
 	const [logoFailed, setLogoFailed] = createSignal(false);
 
 	createEffect(() => {
 		const titleByView: Record<MainView, string> = {
-			st: "Structured Text",
-			"st-monitor": "Monitoreo ST",
 			modbus: "Mapa Modbus",
 		};
 		document.title = `${BRAND_NAME} - ${titleByView[activeView()]}`;
@@ -33,16 +30,12 @@ export function App() {
 			</header>
 
 			<nav class="main-tabs" aria-label="Vistas principales">
-				<button class="main-tab" classList={{active: activeView() === "st"}} type="button" aria-selected={activeView() === "st"} onClick={() => setActiveView("st")}>
-					<span>Structured Text</span>
-				</button>
-				<button class="main-tab" classList={{active: activeView() === "st-monitor"}} type="button" aria-selected={activeView() === "st-monitor"} onClick={() => setActiveView("st-monitor")}>
-					<span>Monitoreo ST</span>
+				<button class="main-tab" classList={{active: true}} type="button" aria-selected="true">
+					<span>Mapa Modbus</span>
 				</button>
 			</nav>
 
-			{activeView() === "st" && <StructuredTextView />}
-			{activeView() === "st-monitor" && <StVariableMonitorView />}
+			<ModbusMapView />
 		</main>
 	);
 }
