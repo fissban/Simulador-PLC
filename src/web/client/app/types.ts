@@ -1,18 +1,15 @@
-export type RegisterGroup = "analogicos" | "digitales" | "directos";
 export type MainView = "modbus";
 
 export type RegisterRow = {
     address: number;
     formattedAddress: string;
     type: string;
-    group: RegisterGroup;
     name: string;
     description: string;
     writable: string;
     runtimeFunction: string;
     expression: string;
-    configValue: string;
-    modbusValue: string;
+    value: string;
 };
 
 export type RegistersResponse = {

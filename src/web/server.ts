@@ -2,20 +2,20 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { serverConfigData } from "../data/ServerConfigData";
+import { mappingManager } from "../simulator/managers/MappingManager";
+import { AddresType } from "../simulator/scripts/types";
 
 interface RegisterRow
 {
     address: number;
     formattedAddress: string;
     type: string;
-    group: string;
     name: string;
     description: string;
     writable: string;
     runtimeFunction: string;
     expression: string;
-    configValue: string;
-    modbusValue: string;
+    value: string;
 }
 
 const PUBLIC_DIR = path.join(__dirname, "public");
@@ -29,9 +29,50 @@ const MIME_TYPES: Record<string, string> = {
     ".txt": "text/plain; charset=utf-8"
 };
 
+/**
+ * Devuelve la etiqueta legible para un tipo de dirección.
+ */
+function getTypeLabel(type: AddresType): string
+{
+    switch (type)
+    {
+        case AddresType.C: return "Coil";
+        case AddresType.HR: return "Holding Register";
+        case AddresType.HRF: return "Holding Register Float";
+        case AddresType.B: return "Bit";
+        default: return "Desconocido";
+    }
+}
+
+/**
+ * Formatea un valor numérico para mostrarlo con un máximo de 3 decimales,
+ * eliminando ceros/decimales innecesarios (ej. 12.5, 100, 3.142).
+ */
+function formatValue(value: number): string
+{
+    return String(Math.round(value * 1000) / 1000);
+}
+
+/**
+ * Construye las filas a mostrar en la web a partir de todos los mapeos
+ * registrados en `MappingManager`, leyendo su valor actual desde la memoria.
+ */
 function buildRows(): RegisterRow[]
 {
-    return [];
+    return mappingManager.getAll().map((entry) =>
+    {
+        return {
+            address: entry.address,
+            formattedAddress: String(entry.address),
+            type: getTypeLabel(entry.type),
+            name: entry.name,
+            description: "",
+            writable: "",
+            runtimeFunction: "",
+            expression: "",
+            value: formatValue(entry.value)
+        };
+    });
 }
 
 function getSafePublicFilePath(requestPath: string): string | null

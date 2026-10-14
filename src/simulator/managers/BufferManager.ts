@@ -1,11 +1,44 @@
+import { AddresType, DataModel } from "../scripts/types";
+
+/**
+ * ============================================================================
+ * BufferManager
+ * ============================================================================
+ *
+ * Gestiona la memoria del simulador PLC como una capa unificada basada en
+ * `Buffer` de Node.js, emulando el almacenamiento de datos de un dispositivo
+ * Modbus. Centraliza toda la lectura y escritura de datos, garantizando que
+ * los accesos se realicen dentro de los límites de memoria definidos.
+ *
+ * Áreas de memoria:
+ *  - COILS: salidas digitales booleanas (1 byte por coil para acceso rápido).
+ *  - HOLDING REGISTERS (HR): bloque continuo de registros de 16 bits
+ *    (2 bytes por registro), sobre el que se interpretan distintos tipos de
+ *    datos.
+ *
+ * Tipos de datos soportados sobre los Holding Registers:
+ *  - Int16  : enteros con signo de 16 bits.
+ *  - UInt16 : enteros sin signo de 16 bits.
+ *  - Bit    : acceso a un bit individual (0-15) dentro de un registro.
+ *  - Float32: números en coma flotante IEEE 754 (ocupan 2 registros).
+ *
+ * Todos los valores se almacenan en formato Big-Endian (BE), coherente con el
+ * estándar Modbus. Los métodos helper (get/set) validan el rango de direcciones
+ * y devuelven valores seguros por defecto ante accesos fuera de límites.
+ *
+ * Se exporta una única instancia compartida (`bufferManager`) a modo de
+ * singleton para que todos los módulos operen sobre la misma memoria.
+ * ============================================================================
+ */
 class BufferManager
 {
     // 1. Memoria unificada mediante Buffers
     COILS_QTY = 100;
     HR_QTY = 11000;
 
-    // 1 byte por Coil para máxima simplicidad y rapidez de acceso
-    coilsBuffer = Buffer.alloc(this.COILS_QTY);
+    // Coils empaquetados en bits (8 coils por byte), formato compatible con
+    // jsmodbus para poder compartir el mismo Buffer sin copias ni sincronización.
+    coilsBuffer = Buffer.alloc(Math.ceil(this.COILS_QTY / 8));
     // Buffer continuo para Holding Registers: 2 bytes por cada registro de 16 bits
     hrBuffer = Buffer.alloc(this.HR_QTY * 2);
 
@@ -14,21 +47,81 @@ class BufferManager
         // Constructor vacío
     }
 
-     // ============================================================================
+    // ============================================================================
     // MÉTODOS HELPER (GET / SET) PARA EL BUFFER
     // ============================================================================
 
-    // --- COILS ---
+    /**
+     * Lee el valor asociado a una dirección de memoria.
+     * - Si `bit` se informa para un `HR`, devuelve el valor del bit solicitado (0/1).
+     * - Si no se informa `bit`, devuelve el valor completo según el tipo de dato.
+     */
+    public read(data: DataModel, bit?: number): number
+    {
+        const bitIndex = bit ?? 0;
+
+        switch (data.type)
+        {
+            case AddresType.C:
+                return this.getCoil(data.address) ? 1 : 0;
+            case AddresType.B:
+                return this.getBit(data.address, bitIndex) ? 1 : 0;
+            case AddresType.HR:
+                if (bit !== undefined) return this.getBit(data.address, bitIndex) ? 1 : 0;
+                return this.getInt16(data.address);
+            case AddresType.HRF:
+                return this.getFloat32(data.address);
+            default:
+                return 0;
+        }
+    }
+
+        /**
+     * Escribe un valor en la dirección indicada respetando el tipo de dato.
+     * Para `B` y `C` cualquier valor mayor a cero se interpreta como activo.
+     */
+    public write(data: DataModel, value: number)
+    {
+        switch (data.type)
+        {
+            case AddresType.B:
+                // TODO sin soporte para escribir bits individuales en HR. Actualmente, cualquier valor mayor a cero activa el bit completo.
+                //this.setBit(data.address, value > 0);
+                break;
+            case AddresType.C:
+                this.setCoil(data.address, value > 0);
+                break;
+            case AddresType.HR:
+                this.setInt16(data.address, value);
+                break;
+            case AddresType.HRF:
+                this.setFloat32(data.address, value);
+                break;
+        }
+    }
+
+    // --- COILS (bit-packed: byte = addr>>3, bit = addr&7) ---
     getCoil(addr: number): boolean
     {
         if (addr < 0 || addr >= this.COILS_QTY) return false;
-        return Boolean(this.coilsBuffer[addr]);
+        const byteIndex = addr >> 3;
+        const bitIndex = addr & 7;
+        return ((this.coilsBuffer[byteIndex] >> bitIndex) & 1) === 1;
     }
 
     setCoil(addr: number, value: boolean): void
     {
         if (addr < 0 || addr >= this.COILS_QTY) return;
-        this.coilsBuffer[addr] = value ? 1 : 0;
+        const byteIndex = addr >> 3;
+        const bitIndex = addr & 7;
+        if (value)
+        {
+            this.coilsBuffer[byteIndex] |= (1 << bitIndex);
+        }
+        else
+        {
+            this.coilsBuffer[byteIndex] &= ~(1 << bitIndex);
+        }
         //console.log(`[Coil Write] Dir ${addr} -> ${value}`);
     }
 

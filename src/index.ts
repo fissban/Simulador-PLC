@@ -1,6 +1,7 @@
 import { serverConfigData } from "./data/ServerConfigData";
 import { startModbusServer } from "./simulator/server";
 import { startWebServer } from "./web/server";
+import { SCv1 } from "./simulator/scripts/softs/SCv1";
 
 /**
  * Flujo de arranque:
@@ -21,6 +22,10 @@ function main(): void
 
         // Inicia el servidor Modbus TCP.
         startModbusServer();
+
+        let soft = new SCv1();
+        soft.init();
+        soft.run();
     }
     catch (error)
     {

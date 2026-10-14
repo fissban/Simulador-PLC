@@ -5,13 +5,11 @@
     "description": "Simulador PLC con servidor Modbus TCP",
     "main": "dist/index.js",
     "scripts": {
+        "server": "tsx watch src/index.ts",
+        "web": "vite",
         "build:server": "tsc -p tsconfig.json",
         "build:web": "vite build",
-        "build": "npm run build:server && npm run build:web",
-        "start:server": "node dist/index.js",
-        "start:web": "vite preview --host 0.0.0.0 --port 4173",
-        "dev:server": "tsx src/index.ts",
-        "dev:web": "vite"
+        "build": "npm run build:server && npm run build:web"
     },
     "keywords": [
         "plc",
@@ -21,7 +19,7 @@
     ],
     "license": "UNLICENSED",
     "dependencies": {
-        "modbus-serial": "^8.0.23",
+        "jsmodbus": "^4.0.10",
         "solid-js": "^1.9.15",
         "zod": "^3.23.8"
     },
