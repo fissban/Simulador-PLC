@@ -1,5 +1,6 @@
 import { PLC } from "../core/PLC";
 import { SCv1 } from "../programs/SCv1";
+import { SCv2 } from "../programs/SCv2";
 
 /**
  * Metadatos de un programa (software) ejecutable sobre el PLC simulado.
@@ -26,7 +27,7 @@ export interface ProgramDefinition
  * operaciones de consulta puras.
  *
  * Para agregar un software nuevo:
- *  1) Crear la clase en `plc/programs/` extendiendo `PLC`.
+ *  1) Crear la clase en `plc/programs/` extendiendo `PLC` o una base compartida.
  *  2) Importarla aquí.
  *  3) Añadir una entrada al arreglo `programs`.
  *
@@ -42,6 +43,12 @@ class ProgramManager
             name: "SCv1 - Señales Analógicas",
             description: "Simula instrumentos analógicos con escalado y alarmas (LOLO/LO/HI/HIHI).",
             create: () => new SCv1()
+        },
+        {
+            id: "SCv2",
+            name: "SCv2 - Señales Analógicas",
+            description: "Simula instrumentos analógicos con escalado y alarmas (LOLO/LO/HI/HIHI).",
+            create: () => new SCv2()
         }
     ];
 
