@@ -1,4 +1,4 @@
-import { bufferManager } from "../managers/BufferManager";
+import { bufferManager } from "../../memory/BufferManager";
 
 export enum AddresType
 {

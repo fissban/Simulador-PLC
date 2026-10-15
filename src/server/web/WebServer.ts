@@ -1,9 +1,10 @@
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
-import { serverConfigData } from "../data/ServerConfigData";
-import { mappingManager } from "../simulator/managers/MappingManager";
-import { AddresType } from "../simulator/scripts/types";
+import { serverConfigManager } from "../../config/ServerConfigManager";
+import { mappingManager } from "../../memory/MappingManager";
+import { AddresType } from "../../plc/core/DataModel";
+import { simulatorManager } from "../../plc/managers/SimulatorManager";
 
 interface RegisterRow
 {
@@ -126,10 +127,91 @@ function serveIndexHtml(res: http.ServerResponse): void
     fs.createReadStream(INDEX_FILE).pipe(res);
 }
 
+/**
+ * Responde con un objeto JSON y el código de estado indicado.
+ */
+function sendJson(res: http.ServerResponse, statusCode: number, payload: unknown): void
+{
+    res.writeHead(statusCode, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify(payload));
+}
+
+/**
+ * Lee y parsea el cuerpo JSON de una petición. Resuelve `{}` si viene vacío.
+ */
+function readJsonBody(req: http.IncomingMessage): Promise<any>
+{
+    return new Promise((resolve, reject) =>
+    {
+        let raw = "";
+        req.on("data", (chunk) => { raw += chunk; });
+        req.on("end", () =>
+        {
+            if (!raw.trim())
+            {
+                resolve({});
+                return;
+            }
+            try { resolve(JSON.parse(raw)); }
+            catch { reject(new Error("JSON inválido en el cuerpo de la petición.")); }
+        });
+        req.on("error", reject);
+    });
+}
+
+/**
+ * Maneja las acciones de control del simulador recibidas por POST.
+ * Body esperado: `{ action: "select" | "start" | "stop", id?: string }`.
+ */
+async function handleSimulatorAction(req: http.IncomingMessage, res: http.ServerResponse): Promise<void>
+{
+    let body: any;
+    try { body = await readJsonBody(req); }
+    catch (error)
+    {
+        sendJson(res, 400, { error: (error as Error).message });
+        return;
+    }
+
+    const action = String(body.action ?? "");
+
+    try
+    {
+        switch (action)
+        {
+            case "select":
+                sendJson(res, 200, simulatorManager.select(String(body.id)));
+                return;
+            case "selectAndStart":
+                sendJson(res, 200, simulatorManager.selectAndStart(String(body.id)));
+                return;
+            case "start":
+                sendJson(res, 200, simulatorManager.start());
+                return;
+            case "pause":
+                sendJson(res, 200, simulatorManager.pause());
+                return;
+            case "stop":
+                sendJson(res, 200, simulatorManager.stop());
+                return;
+            default:
+                sendJson(res, 400, { error: `Acción desconocida: "${action}"` });
+                return;
+        }
+    }
+    catch (error)
+    {
+        sendJson(res, 400, { error: (error as Error).message });
+    }
+}
+
 export function startWebServer(): void
 {
-    const host = serverConfigData.getHost() ?? "0.0.0.0";
-    const port = serverConfigData.getWebPort();
+    const host = serverConfigManager.getHost() ?? "0.0.0.0";
+    const port = serverConfigManager.getWebPort();
 
     const webServer = http.createServer((req, res) =>
     {
@@ -143,6 +225,20 @@ export function startWebServer(): void
                 "Cache-Control": "no-store"
             });
             res.end(JSON.stringify({ rows }));
+            return;
+        }
+
+        // Estado del simulador y catálogo de programas.
+        if (requestUrl.pathname === "/api/simulator" && req.method === "GET")
+        {
+            sendJson(res, 200, simulatorManager.getStatus());
+            return;
+        }
+
+        // Acciones de control: select / start / stop.
+        if (requestUrl.pathname === "/api/simulator" && req.method === "POST")
+        {
+            void handleSimulatorAction(req, res);
             return;
         }
 

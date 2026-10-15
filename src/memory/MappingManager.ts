@@ -1,4 +1,4 @@
-import { AddresType, DataModel } from "../scripts/types";
+import { AddresType, DataModel } from "../plc/core/DataModel";
 import { bufferManager } from "./BufferManager";
 
 /**
@@ -27,6 +27,15 @@ class MappingManager
     public registerMapping(name: string, data: DataModel): void
     {
         this.mapping.set(name, data);
+    }
+
+    /**
+     * Elimina todos los mapeos registrados.
+     * Útil al cambiar de programa simulado para empezar con un mapa limpio.
+     */
+    public clear(): void
+    {
+        this.mapping.clear();
     }
 
     /**

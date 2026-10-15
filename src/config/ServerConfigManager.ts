@@ -10,7 +10,7 @@ export interface ServerConfig
 	webPort?: number;
 }
 
-class ServerConfigData
+class ServerConfigManager
 {
 	private config: ServerConfig | null = null;
 
@@ -70,4 +70,4 @@ class ServerConfigData
 	}
 }
 
-export const serverConfigData = new ServerConfigData();
+export const serverConfigManager = new ServerConfigManager();

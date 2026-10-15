@@ -1,5 +1,5 @@
-import { PLC } from "../PLC";
-import { AddresType, DataModel } from "../types";
+import { PLC } from "../core/PLC";
+import { AddresType, DataModel } from "../core/DataModel";
 
 export class SCv1 extends PLC
 {

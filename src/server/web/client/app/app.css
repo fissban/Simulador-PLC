@@ -763,3 +763,124 @@ tr:nth-child(even) td {
         flex-direction: column;
     }
 }
+
+/* ===== Panel de control del simulador ===== */
+.simulator-control {
+    margin: 1rem 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-soft);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+}
+
+.simulator-control-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+}
+
+.simulator-control-header h2 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.simulator-state {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+}
+
+.simulator-state.running {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.14);
+}
+
+.simulator-state.stopped {
+    color: var(--text-muted);
+    background: rgba(148, 163, 184, 0.14);
+}
+
+.simulator-state.paused {
+    color: var(--amber);
+    background: var(--amber-soft);
+}
+
+.simulator-active {
+    margin: 0 0 0.9rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.simulator-active strong {
+    color: #e5eefb;
+}
+
+.simulator-active-id {
+    color: var(--text-muted);
+}
+
+.simulator-control-row {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.simulator-select {
+    flex: 1 1 240px;
+    min-width: 200px;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--panel-border);
+    background: rgba(8, 17, 31, 0.9);
+    color: var(--text, #e5eefb);
+    font-size: 0.9rem;
+}
+
+.simulator-control .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--panel-border);
+    background: rgba(148, 163, 184, 0.12);
+    color: #e5eefb;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.simulator-control .btn:hover:not(:disabled) {
+    background: rgba(148, 163, 184, 0.22);
+}
+
+.simulator-control .btn-primary {
+    background: var(--blue-strong);
+    border-color: var(--blue-strong);
+}
+
+.simulator-control .btn-primary:hover:not(:disabled) {
+    background: var(--blue);
+}
+
+.simulator-control .btn-danger {
+    background: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+
+.simulator-control .btn-danger:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.28);
+}
+
+.simulator-control .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.simulator-error {
+    margin: 0.75rem 0 0;
+    color: #fca5a5;
+    font-size: 0.85rem;
+}

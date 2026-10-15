@@ -1,5 +1,6 @@
 ﻿import {createEffect, createSignal} from "solid-js";
 import {ModbusMapView} from "./components/ModbusMapView";
+import {SimulatorControl} from "./components/SimulatorControl";
 import type {MainView} from "./types";
 
 const BRAND_NAME = "Dobby Modbus Engine";
@@ -34,6 +35,8 @@ export function App() {
 					<span>Mapa Modbus</span>
 				</button>
 			</nav>
+
+			<SimulatorControl />
 
 			<ModbusMapView />
 		</main>

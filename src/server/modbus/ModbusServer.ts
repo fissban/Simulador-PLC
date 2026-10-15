@@ -1,7 +1,7 @@
 import net from "net";
 import * as jsmodbus from "jsmodbus";
-import { serverConfigData } from "./../data/ServerConfigData";
-import { bufferManager } from "./managers/BufferManager";
+import { serverConfigManager } from "../../config/ServerConfigManager";
+import { bufferManager } from "../../memory/BufferManager";
 
 /**
  * Inicia el servidor Modbus TCP usando la memoria actual del PLC simulado.
@@ -24,8 +24,8 @@ import { bufferManager } from "./managers/BufferManager";
  */
 export function startModbusServer(): void
 {
-    const host = serverConfigData.getHost() ?? "0.0.0.0";
-    const port = serverConfigData.getPort() ?? 502;
+    const host = serverConfigManager.getHost() ?? "0.0.0.0";
+    const port = serverConfigManager.getPort() ?? 502;
 
     // Servidor TCP de Node sobre el que corre el servidor Modbus.
     const netServer = new net.Server();

@@ -1,4 +1,4 @@
-import { AddresType, DataModel } from "../scripts/types";
+import { AddresType, DataModel } from "../plc/core/DataModel";
 
 /**
  * ============================================================================
@@ -45,6 +45,16 @@ class BufferManager
     constructor()
     {
         // Constructor vacío
+    }
+
+    /**
+     * Resetea toda la memoria a cero (coils y holding registers).
+     * Útil al cambiar de programa simulado para no arrastrar valores previos.
+     */
+    public clear(): void
+    {
+        this.coilsBuffer.fill(0);
+        this.hrBuffer.fill(0);
     }
 
     // ============================================================================

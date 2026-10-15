@@ -1,6 +1,5 @@
-import { create } from "node:domain";
-import { AddresType, DataModel } from "./types";
-import { mappingManager } from "../managers/MappingManager";
+import { AddresType, DataModel } from "./DataModel";
+import { mappingManager } from "../../memory/MappingManager";
 
 export abstract class PLC
 {
@@ -33,13 +32,28 @@ export abstract class PLC
     /**
      * Ejecuta el ciclo de simulación, que puede incluir la lectura de entradas,
      * procesamiento de datos y escritura de salidas.
+     *
+     * Es idempotente: si ya está corriendo, no crea un segundo timer.
      */
     public run()
     {
+        if (this.timer)
+        {
+            return;
+        }
+
         this.timer = setInterval(() =>
         {
             this.execute();
         }, this.SCAN_INTERVAL_MS);
+    }
+
+    /**
+     * Indica si el ciclo de simulación está actualmente en ejecución.
+     */
+    public isRunning(): boolean
+    {
+        return this.timer !== null;
     }
 
     /**

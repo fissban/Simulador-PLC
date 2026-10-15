@@ -15,3 +15,21 @@ export type RegisterRow = {
 export type RegistersResponse = {
     rows: RegisterRow[];
 };
+
+export type ProgramStatus = {
+    id: string;
+    name: string;
+    description: string;
+    selected: boolean;
+    running: boolean;
+};
+
+export type SimulatorState = "running" | "paused" | "stopped";
+
+export type SimulatorStatus = {
+    activeId: string | null;
+    activeName: string | null;
+    running: boolean;
+    state: SimulatorState;
+    programs: ProgramStatus[];
+};

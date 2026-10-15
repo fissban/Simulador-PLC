@@ -1,21 +1,22 @@
-import { serverConfigData } from "./data/ServerConfigData";
-import { startModbusServer } from "./simulator/server";
-import { startWebServer } from "./web/server";
-import { SCv1 } from "./simulator/scripts/softs/SCv1";
+import { serverConfigManager } from "./config/ServerConfigManager";
+import { startModbusServer } from "./server/modbus/ModbusServer";
+import { startWebServer } from "./server/web/WebServer";
+import { simulatorManager } from "./plc/managers/SimulatorManager";
 
 /**
  * Flujo de arranque:
  * 1) Carga configuración del servidor desde JSON.
  * 2) Levanta servidor web para visualizar el estado actual.
  * 3) Levanta servidor Modbus TCP.
- * 4) Reporta errores de inicialización y termina con código 1.
+ * 4) Arranca el programa de simulación del PLC.
+ * 5) Reporta errores de inicialización y termina con código 1.
  */
 function main(): void
 {
     try
     {
         // Carga de la configuración necesaria para el server.
-        serverConfigData.load();
+        serverConfigManager.load();
 
         // Inicia servidor web para visualizar el estado actual.
         startWebServer();
@@ -23,9 +24,8 @@ function main(): void
         // Inicia el servidor Modbus TCP.
         startModbusServer();
 
-        let soft = new SCv1();
-        soft.init();
-        soft.run();
+        // Inicia el programa de simulación del PLC.
+        simulatorManager.startDefault();
     }
     catch (error)
     {
