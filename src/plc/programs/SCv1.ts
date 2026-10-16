@@ -6,12 +6,12 @@ export class SCv1 extends SC
     // DIRECTOS =========================================================
     // VSS
     VSS_SIZE = 4;
-
+    // Bits de las condiciones seguras
     readonly D_CONFIG_VSS_1 = 0;
     readonly D_CONFIG_VSS_2 = 1;
     readonly D_CONFIG_VSS_3 = 2;
     readonly D_CONFIG_VSS_4 = 3;
-    // VSS 1
+    // Estados de las VSS
     D_ACTIVA_DEMANDA_VSS: DataModel[] = [];
     D_ESTADO_VSS: DataModel[] = [];
 
