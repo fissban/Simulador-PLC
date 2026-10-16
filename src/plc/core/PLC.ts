@@ -76,7 +76,13 @@ export abstract class PLC
      * @param type Tipo de dirección.
      * @returns Array de objetos DataModel con las direcciones y tipos.
      */
-    protected createAddressRange(name: string, addressStart: number, count: number, type: AddresType): DataModel[]
+    protected createAddressRange(
+        name: string,
+        addressStart: number,
+        count: number,
+        type: AddresType,
+        mappingIndexStart: number = 0
+    ): DataModel[]
     {
         return Array.from({ length: count }, (_, index) =>
         {
@@ -84,7 +90,7 @@ export abstract class PLC
 
             const data = new DataModel(addressStart + (index * step), type);
             // Registrar el mapeo con un nombre único para cada dirección en el rango
-            mappingManager.registerMapping(`${name}_${index}`, data);
+            mappingManager.registerMapping(`${name}_${mappingIndexStart + index}`, data);
 
             return data;
         });

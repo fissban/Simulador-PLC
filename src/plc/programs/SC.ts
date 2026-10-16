@@ -4,10 +4,13 @@ import { AddresType, DataModel } from "../core/DataModel";
 export abstract class SC extends PLC
 {
     readonly OA_SIZE = 50;
-    readonly ALARM_POS_LOLO = 0;
-    readonly ALARM_POS_LO = 1;
-    readonly ALARM_POS_HI = 2;
-    readonly ALARM_POS_HIHI = 3;
+    readonly ID_SIZE = 20;
+
+    // ================== ANALOGICOS ================== //
+    readonly IA_CONFIG_ALARM_POS_LOLO = 0;
+    readonly IA_CONFIG_ALARM_POS_LO = 1;
+    readonly IA_CONFIG_ALARM_POS_HI = 2;
+    readonly IA_CONFIG_ALARM_POS_HIHI = 3;
 
     // Señales simuladas de Instrumentos Analógicos (10000, 10002, ...)
     public IA_INPUT: DataModel[] = [];
@@ -30,6 +33,22 @@ export abstract class SC extends PLC
     public IA_SET_POINT_LL: DataModel[] = [];
     // Dead band
     public IA_DEAD_BAND: DataModel[] = [];
+
+    // ================== DIGITALES ================== //
+    readonly ID_CONFIG_POS_HABILITADO = 0;
+    readonly ID_CONFIG_POS_NO_ALARMA = 1;
+    readonly ID_CONFIG_POS_HABILITADA = 2;
+    readonly ID_CONFIG_POS_INTERLOCKS = [3, 4, 5, 6, 7];
+
+    // Instrumentos digitales (Numero 1..20, según el parámetro Numero del UDT).
+    //public ID_NUMERO: DataModel[] = [];
+    public ID_CONFIG: DataModel[] = [];
+    // Valor usa bit 0 (Valor) y bit 1 (Activada) en el mismo registro.
+    public ID_VALOR: DataModel[] = [];
+    public ID_DELAY_ACTIVACION: DataModel[] = [];
+    public ID_DELAY_DESACTIVACION: DataModel[] = [];
+
+    private ID_ACTIVACION_PENDIENTE_DESDE: Array<number | null> = [];
 
     constructor(scanIntervalMs: number = 250)
     {
@@ -112,45 +131,93 @@ export abstract class SC extends PLC
         const setPointHH = this.IA_SET_POINT_HH[index].read();
 
         // Estado previo de cada alarma individual, leído desde el word anterior.
-        const wasLoLo = this.getBitValue(prevState, this.ALARM_POS_LOLO) === 1;
-        const wasLo = this.getBitValue(prevState, this.ALARM_POS_LO) === 1;
-        const wasHi = this.getBitValue(prevState, this.ALARM_POS_HI) === 1;
-        const wasHiHi = this.getBitValue(prevState, this.ALARM_POS_HIHI) === 1;
+        const wasLoLo = this.getBitValue(prevState, this.IA_CONFIG_ALARM_POS_LOLO) === 1;
+        const wasLo = this.getBitValue(prevState, this.IA_CONFIG_ALARM_POS_LO) === 1;
+        const wasHi = this.getBitValue(prevState, this.IA_CONFIG_ALARM_POS_HI) === 1;
+        const wasHiHi = this.getBitValue(prevState, this.IA_CONFIG_ALARM_POS_HIHI) === 1;
 
         // Nuevo word de estado a reconstruir en cada ciclo.
         let state = 0;
 
         // LOLO: alarma muy baja.
-        if (this.isAlarmEnabled(config, this.ALARM_POS_LOLO) && this.isLowAlarmActive(value, setPointLL, deadBand, wasLoLo))
+        if (this.isAlarmEnabled(config, this.IA_CONFIG_ALARM_POS_LOLO) && this.isLowAlarmActive(value, setPointLL, deadBand, wasLoLo))
         {
-            state |= (1 << this.ALARM_POS_LOLO);
+            state |= (1 << this.IA_CONFIG_ALARM_POS_LOLO);
         }
 
         // LO: alarma baja.
-        if (this.isAlarmEnabled(config, this.ALARM_POS_LO) && this.isLowAlarmActive(value, setPointL, deadBand, wasLo))
+        if (this.isAlarmEnabled(config, this.IA_CONFIG_ALARM_POS_LO) && this.isLowAlarmActive(value, setPointL, deadBand, wasLo))
         {
-            state |= (1 << this.ALARM_POS_LO);
+            state |= (1 << this.IA_CONFIG_ALARM_POS_LO);
         }
 
         // HI: alarma alta.
-        if (this.isAlarmEnabled(config, this.ALARM_POS_HI) && this.isHighAlarmActive(value, setPointH, deadBand, wasHi))
+        if (this.isAlarmEnabled(config, this.IA_CONFIG_ALARM_POS_HI) && this.isHighAlarmActive(value, setPointH, deadBand, wasHi))
         {
-            state |= (1 << this.ALARM_POS_HI);
+            state |= (1 << this.IA_CONFIG_ALARM_POS_HI);
         }
 
         // HIHI: alarma muy alta.
-        if (this.isAlarmEnabled(config, this.ALARM_POS_HIHI) && this.isHighAlarmActive(value, setPointHH, deadBand, wasHiHi))
+        if (this.isAlarmEnabled(config, this.IA_CONFIG_ALARM_POS_HIHI) && this.isHighAlarmActive(value, setPointHH, deadBand, wasHiHi))
         {
-            state |= (1 << this.ALARM_POS_HIHI);
+            state |= (1 << this.IA_CONFIG_ALARM_POS_HIHI);
         }
 
         // Se persiste el nuevo estado para el próximo ciclo y para consulta externa.
         this.IA_ESTADO[index].write(state);
     }
 
+    private writeRegisterBit(register: DataModel, bitPos: number, value: boolean): void
+    {
+        const currentValue = register.read();
+        const bitMask = 1 << bitPos;
+        const newValue = value ? currentValue | bitMask : currentValue & ~bitMask;
+
+        register.write(newValue);
+    }
+
+    /**
+     * Calcula la alarma digital desde Valor (bit 0) y actualiza Activada (bit 1),
+     * aplicando la configuración y los delays sin modificar la señal simulada.
+     */
+    private updateDigitalAlarmState(index: number, elapsedMs: number): void
+    {
+        const config = this.ID_CONFIG[index].read();
+        const value = this.ID_VALOR[index].read(0) === 1;
+
+        const enabled = this.getBitValue(config, this.ID_CONFIG_POS_HABILITADO) === 1;
+        const alarmEnabled = this.getBitValue(config, this.ID_CONFIG_POS_HABILITADA) === 1;
+        const alarmSuppressed = this.getBitValue(config, this.ID_CONFIG_POS_NO_ALARMA) === 1;
+        const hasActiveInterlock = this.ID_CONFIG_POS_INTERLOCKS.some((bitPos) => this.getBitValue(config, bitPos) === 1);
+        const shouldBeActive = value && enabled && alarmEnabled && !alarmSuppressed && !hasActiveInterlock;
+        const isActive = this.ID_VALOR[index].read(1) === 1;
+
+        if (shouldBeActive === isActive)
+        {
+            this.ID_ACTIVACION_PENDIENTE_DESDE[index] = null;
+            return;
+        }
+
+        const pendingSince = this.ID_ACTIVACION_PENDIENTE_DESDE[index];
+        if (pendingSince === null)
+        {
+            this.ID_ACTIVACION_PENDIENTE_DESDE[index] = elapsedMs;
+        }
+
+        const delay = shouldBeActive ? this.ID_DELAY_ACTIVACION[index].read() : this.ID_DELAY_DESACTIVACION[index].read();
+        const transitionStartedAt = this.ID_ACTIVACION_PENDIENTE_DESDE[index] ?? elapsedMs;
+
+        if (elapsedMs - transitionStartedAt >= Math.max(0, delay))
+        {
+            this.writeRegisterBit(this.ID_VALOR[index], 1, shouldBeActive);
+            this.ID_ACTIVACION_PENDIENTE_DESDE[index] = null;
+        }
+    }
 
     init(): void
     {
+        // ================== ANALOGICOS ================== //
+
         // Mapa de direcciones por grupo funcional de variables analógicas.
         this.IA_INPUT = this.createAddressRange('IA_INPUT', 10000, this.OA_SIZE, AddresType.HRF);
         this.IA_VALOR = this.createAddressRange('IA_VALOR', 2600, this.OA_SIZE, AddresType.HRF);// 5000
@@ -171,10 +238,28 @@ export abstract class SC extends PLC
         this.IA_RANGO_MAX.forEach((item) => item.write(600));
         this.IA_INGENIERIA_MIN.forEach((item) => item.write(0));
         this.IA_INGENIERIA_MAX.forEach((item) => item.write(100));
+
+        // ================== DIGITALES ================== //
+
+        // Mapa UDT Objeto_Digital: las direcciones se calculan desde Numero (1..20).
+        //this.ID_NUMERO = this.createAddressRange("ID_NUMERO", 1310, this.ID_SIZE, AddresType.HR, 1);
+        this.ID_CONFIG = this.createAddressRange("ID_CONFIG", 152, this.ID_SIZE, AddresType.HR, 1);
+        this.ID_VALOR = this.createAddressRange("ID_VALOR", 2422, this.ID_SIZE, AddresType.HR, 1);
+        this.ID_DELAY_ACTIVACION = this.createAddressRange("ID_DELAY_ACTIVACION", 242, this.ID_SIZE, AddresType.HR, 1);
+        this.ID_DELAY_DESACTIVACION = this.createAddressRange("ID_DELAY_DESACTIVACION", 262, this.ID_SIZE, AddresType.HR, 1);
+
+        //this.ID_NUMERO.forEach((item, index) => item.write(index + 1));
+        this.ID_DELAY_ACTIVACION.forEach((item) => item.write(0));
+        this.ID_DELAY_DESACTIVACION.forEach((item) => item.write(0));
+        this.ID_ACTIVACION_PENDIENTE_DESDE = Array(this.ID_SIZE).fill(null);
+
+
     }
 
     execute(): void
     {
+        // ================== ANALOGICOS ================== //
+
         // ETAPA 1: Generación de señal cruda en direcciones IA_INPUT.
         // Cada canal recibe una señal simulada independiente que representa
         // la medición bruta llegada desde el instrumento/campo, oscilando
@@ -217,7 +302,22 @@ export abstract class SC extends PLC
             this.updateAlarmState(index);
         });
 
+        // ================== DIGITALES ================== //
+        
+        // ETAPA 4: Generación de señal digital en el bit 0 (Valor) del registro.
+        // Cada canal usa una onda cuadrada desfasada, conservando el bit de alarma.
+        this.ID_VALOR.forEach((output, index) =>
+        {
+            const value = this.square(elapsedMs + (index * this.WAVE_PERIOD_MS / this.ID_SIZE), 0, 1) >= 0.5;
+            this.writeRegisterBit(output, 0, value);
+        });
 
+        // ETAPA 5: Cálculo de alarma digital en el bit 1 (Activada) del registro.
+        // Lee la señal generada y aplica habilitaciones, interlocks y delays.
+        this.ID_VALOR.forEach((_valor, index) =>
+        {
+            this.updateDigitalAlarmState(index, elapsedMs);
+        });
 
     }
 }
