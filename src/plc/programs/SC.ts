@@ -15,7 +15,9 @@ export interface Analogico
     setPointH: DataModel,
     setPointL: DataModel,
     setPointLl: DataModel,
-    deadBand: DataModel;
+    deadBand: DataModel,
+
+    id: DataModel,
 }
 
 export interface Digital
@@ -29,17 +31,18 @@ export interface Digital
 
 export abstract class SC extends PLC
 {
-    readonly IA_SIZE = 50;
-    readonly ID_SIZE = 20;
+    public readonly IA_SIZE = 50;
+    public readonly ID_SIZE = 20;
 
     // =================== DIRECTOS =================== //
     public estadoEnsayo: DataModel | null = null;
     public tensionBateria: DataModel | null = null;
     // ================== ANALOGICOS ================== //
-    readonly IA_CONFIG_ALARM_POS_LOLO = 0;
-    readonly IA_CONFIG_ALARM_POS_LO = 1;
-    readonly IA_CONFIG_ALARM_POS_HI = 2;
-    readonly IA_CONFIG_ALARM_POS_HIHI = 3;
+    readonly IA_HABILITADA = 0;
+    readonly IA_CONFIG_ALARM_POS_LOLO = 1;
+    readonly IA_CONFIG_ALARM_POS_LO = 2;
+    readonly IA_CONFIG_ALARM_POS_HI = 3;
+    readonly IA_CONFIG_ALARM_POS_HIHI = 4;
 
     private readonly analogicos: Analogico[] = [];
 
@@ -89,7 +92,8 @@ export abstract class SC extends PLC
                 setPointH: this.createAddress(`IA_SET_POINT_H_${i}`, 840 + stepHRF, AddresType.HRF, { number: i, field: "setPointH" }),
                 setPointL: this.createAddress(`IA_SET_POINT_L_${i}`, 940 + stepHRF, AddresType.HRF, { number: i, field: "setPointL" }),
                 setPointLl: this.createAddress(`IA_SET_POINT_LL_${i}`, 1040 + stepHRF, AddresType.HRF, { number: i, field: "setPointLl" }),
-                deadBand: this.createAddress(`IA_DEAD_BAND_${i}`, 1140 + stepHRF, AddresType.HRF, { number: i, field: "deadBand" })
+                deadBand: this.createAddress(`IA_DEAD_BAND_${i}`, 1140 + stepHRF, AddresType.HRF, { number: i, field: "deadBand" }),
+                id: this.createAddress(`IA_ID_${i}`, 1260 + stepHRF, AddresType.HRF, { number: i, field: "id" })
             };
             instrumento.rangoMin.write(0);
             instrumento.rangoMax.write(Math.floor(Math.random() * 4000));
@@ -147,6 +151,12 @@ export abstract class SC extends PLC
         // para cada instrumento (por ejemplo, 0..600 -> 0..100).
         this.analogicos.forEach((analogico) =>
         {
+            const isEnabled = this.getBitValue(analogico.config.read(), this.IA_HABILITADA) === 1 ? true : false;
+            if (!isEnabled) 
+            {
+                analogico.valor.write(0);
+                return;
+            }
             // Valor medido por el instrumento (señal cruda)
             const value = analogico.input.read();
             // Rango crudo configurado para el canal
@@ -166,7 +176,12 @@ export abstract class SC extends PLC
         // `IA_ESTADO` previo para aplicar histéresis en la desactivación.
         this.analogicos.forEach((analogico) =>
         {
-            this.updateAlarmState(analogico);
+            const isEnabled = this.getBitValue(analogico.config.read(), this.IA_HABILITADA) === 1 ? true : false;
+            if (isEnabled) 
+            {
+                this.updateAlarmState(analogico);
+            }
+            
         });
 
         // ================== DIGITALES ================== //
@@ -188,6 +203,11 @@ export abstract class SC extends PLC
 
     }
 
+    public getAnalogicos(): Analogico[]
+    {
+        return this.analogicos;
+    }
+
     public getAnalogico(numero: number): Analogico
     {
         const analogico = Number.isInteger(numero) ? this.analogicos[numero - 1] : undefined;
@@ -197,6 +217,11 @@ export abstract class SC extends PLC
         }
 
         return analogico;
+    }
+
+    public getDigitales(): Digital[]
+    {
+        return this.digitales;
     }
 
     public getDigital(numero: number): Digital
@@ -217,15 +242,6 @@ export abstract class SC extends PLC
     private getBitValue(value: number, bitPos: number): number
     {
         return (value >> bitPos) & 1;
-    }
-
-    /**
-     * Indica si la alarma está habilitada en el registro de configuración.
-     * Cada alarma usa una posición de bit fija dentro de `IA_CONFIG`.
-     */
-    private isAlarmEnabled(config: number, alarmBitPos: number): boolean
-    {
-        return this.getBitValue(config, alarmBitPos) === 1;
     }
 
     /**
@@ -285,6 +301,11 @@ export abstract class SC extends PLC
         const setPointH = analogico.setPointH.read();
         const setPointHH = analogico.setPointHh.read();
 
+        // Estado actual de cada alarma individual, que se calculará a continuación
+        const isLoLoActive = this.getBitValue(config, this.IA_CONFIG_ALARM_POS_LOLO) === 1;
+        const isLoActive = this.getBitValue(config, this.IA_CONFIG_ALARM_POS_LO) === 1;
+        const isHiActive = this.getBitValue(config, this.IA_CONFIG_ALARM_POS_HI) === 1;
+        const isHiHiActive = this.getBitValue(config, this.IA_CONFIG_ALARM_POS_HIHI) === 1;
         // Estado previo de cada alarma individual, leído desde el word anterior.
         const wasLoLo = this.getBitValue(prevState, this.IA_CONFIG_ALARM_POS_LOLO) === 1;
         const wasLo = this.getBitValue(prevState, this.IA_CONFIG_ALARM_POS_LO) === 1;
@@ -295,25 +316,25 @@ export abstract class SC extends PLC
         let state = 0;
 
         // LOLO: alarma muy baja.
-        if (this.isAlarmEnabled(config, this.IA_CONFIG_ALARM_POS_LOLO) && this.isLowAlarmActive(value, setPointLL, deadBand, wasLoLo))
+        if (isLoLoActive && this.isLowAlarmActive(value, setPointLL, deadBand, wasLoLo))
         {
             state |= (1 << this.IA_CONFIG_ALARM_POS_LOLO);
         }
 
         // LO: alarma baja.
-        if (this.isAlarmEnabled(config, this.IA_CONFIG_ALARM_POS_LO) && this.isLowAlarmActive(value, setPointL, deadBand, wasLo))
+        if (isLoActive && this.isLowAlarmActive(value, setPointL, deadBand, wasLo))
         {
             state |= (1 << this.IA_CONFIG_ALARM_POS_LO);
         }
 
         // HI: alarma alta.
-        if (this.isAlarmEnabled(config, this.IA_CONFIG_ALARM_POS_HI) && this.isHighAlarmActive(value, setPointH, deadBand, wasHi))
+        if (isHiActive && this.isHighAlarmActive(value, setPointH, deadBand, wasHi))
         {
             state |= (1 << this.IA_CONFIG_ALARM_POS_HI);
         }
 
         // HIHI: alarma muy alta.
-        if (this.isAlarmEnabled(config, this.IA_CONFIG_ALARM_POS_HIHI) && this.isHighAlarmActive(value, setPointHH, deadBand, wasHiHi))
+        if (isHiHiActive && this.isHighAlarmActive(value, setPointHH, deadBand, wasHiHi))
         {
             state |= (1 << this.IA_CONFIG_ALARM_POS_HIHI);
         }

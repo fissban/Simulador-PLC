@@ -575,7 +575,7 @@ h1 {
 }
 
 .st-monitor-table-wrap {
-    height: max(220px, calc(100vh - 480px));
+    height: max(220px, calc(100vh - 570px));
     overflow: auto;
     border: 1px solid rgba(148, 163, 184, 0.22);
     border-radius: 10px;
@@ -685,6 +685,27 @@ h1 {
 .analog-instrument-status {
     color: var(--text-muted);
     font-size: 0.8rem;
+}
+
+.analog-enabled-badge {
+    padding: 3px 8px;
+    border: 1px solid var(--panel-border);
+    border-radius: 999px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.analog-enabled-badge.is-enabled {
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.12);
+    color: #86efac;
+}
+
+.analog-enabled-badge.is-disabled {
+    border-color: rgba(245, 158, 11, 0.4);
+    background: var(--amber-soft);
+    color: #fcd34d;
 }
 
 .analog-register {

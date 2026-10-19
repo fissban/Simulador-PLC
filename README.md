@@ -84,6 +84,9 @@ La lógica de simulación actual vive enteramente en código TypeScript.
 
 ## Vista de instrumentos analógicos
 
+El encabezado de cada analógico muestra un badge Habilitado/Deshabilitado según
+el bit 0 de su registro de configuración, incluso con el nodo cerrado.
+
 `GET /api/registers` conserva las filas de registros y agrega el objeto opcional
 `instrument` con `number` y `field`. Los registros de configuración y estado
 incluyen además `alarmBits`, con las posiciones de HH/H/L/LL definidas por el PLC.
@@ -112,4 +115,22 @@ funcionan igual que en Analógicos. Directos conserva el listado de registros.
 
 ```powershell
 node --import tsx --test tests\AnalogMappings.test.ts tests\DigitalMappings.test.ts
+```
+
+## Volumen de pileta en SCv1
+
+SCv1 utiliza una sola pileta. En cada ciclo, después del escalado analógico, el
+nivel actual se lee del IA 50 y su ingeniería máxima representa la altura máxima.
+El volumen máximo es el área configurada por esa altura; el volumen actual es
+ese volumen máximo multiplicado por la fracción de llenado (nivel / altura máxima).
+El nivel se limita entre cero y la altura máxima.
+
+El área se lee de `D_AREA_PILETA_1` (294, Float32, valor inicial 27) y el resultado
+se escribe en `D_VOLUMEN_PILETA_1` (2848, Float32). Si el área está en m² y el nivel
+en metros, el volumen queda en m³; no se aplican conversiones de unidades.
+La altura máxima debe ser finita y positiva, el área finita y no negativa y el
+nivel finito; una configuración inválida genera un error explícito.
+
+```powershell
+node --import tsx --test tests\PiletaVolume.test.ts
 ```

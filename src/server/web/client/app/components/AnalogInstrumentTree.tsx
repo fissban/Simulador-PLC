@@ -35,6 +35,19 @@ function alarmText(row: RegisterRow | undefined, label: string, isConfig: boolea
     return isConfig ? (state ? "Habilitada" : "Deshabilitada") : (state ? "Activa" : "Inactiva");
 }
 
+function enabledState(row: RegisterRow | undefined): boolean | undefined
+{
+    if (!row || !row.value.trim()) return undefined;
+    const value = Number(row.value);
+    return Number.isInteger(value) ? (value & 1) === 1 : undefined;
+}
+
+function enabledText(row: RegisterRow | undefined): string
+{
+    const enabled = enabledState(row);
+    return enabled === undefined ? "Habilitación no disponible" : enabled ? "Habilitado" : "Deshabilitado";
+}
+
 export function AnalogInstrumentTree(props: {
     rows: RegisterRow[];
     search: string;
@@ -54,6 +67,7 @@ export function AnalogInstrumentTree(props: {
             const searchText = [
                 `Analógico ${number}`,
                 "Configuración Escalado Alarmas Estado Entrada cruda Valor Dead band",
+                enabledText(fields?.get("config")),
                 ...SCALE_FIELDS.map((field) => field.label),
                 ...Array.from(fields?.values() ?? []).flatMap((row) => [
                     row.name, row.formattedAddress, row.type, row.value, row.description
@@ -102,6 +116,18 @@ export function AnalogInstrumentTree(props: {
                                     label={
                                         <span class="analog-instrument-summary">
                                             <strong>Analógico {number}</strong>
+                                            <span
+                                                class="analog-enabled-badge"
+                                                classList={{
+                                                    "is-enabled": enabledState(row("config")) === true,
+                                                    "is-disabled": enabledState(row("config")) === false
+                                                }}
+                                                title={row("config")
+                                                    ? `${row("config")?.name} · ${row("config")?.formattedAddress}.0`
+                                                    : "Registro de configuración no disponible"}
+                                            >
+                                                {enabledText(row("config"))}
+                                            </span>
                                             <span class="analog-instrument-value">Valor: {row("valor")?.value ?? "No disponible"}</span>
                                             <span class="analog-instrument-status" classList={{ "alarm-active": activeAlarms().length > 0 }}>
                                                 {!stateAvailable() ? "Estado no disponible" : activeAlarms().length > 0
