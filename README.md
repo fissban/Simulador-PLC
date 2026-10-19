@@ -37,6 +37,7 @@ Web de monitoreo:
 - URL: `http://localhost:8080` (o el `webPort` configurado)
 - Muestra el estado actual expuesto por la API del simulador
 - El mapa Modbus se divide en pestañas de Analógicos, Digitales y Directos, con búsqueda por grupo y actualización en tiempo real.
+- Analógicos muestra un árbol por instrumento con valor de ingeniería, entrada cruda, escalado, configuración y estado de alarmas HH/H/L/LL. Cada variable conserva su dirección y tipo; los bits indican su posición en el registro. La búsqueda despliega los instrumentos coincidentes y los nodos abiertos se conservan al actualizar o cambiar de pestaña.
 
 ### Producción
 
@@ -80,3 +81,35 @@ La interfaz web está separada por capas:
 En `npm run build`, la web se genera en `dist/web/public` y el servidor Node la sirve como SPA.
 
 La lógica de simulación actual vive enteramente en código TypeScript.
+
+## Vista de instrumentos analógicos
+
+`GET /api/registers` conserva las filas de registros y agrega el objeto opcional
+`instrument` con `number` y `field`. Los registros de configuración y estado
+incluyen además `alarmBits`, con las posiciones de HH/H/L/LL definidas por el PLC.
+La web usa estos metadatos para construir el árbol, sin interpretar los nombres.
+La vista es de monitoreo: no modifica registros ni configura el instrumento.
+
+Pruebas de los metadatos y la compatibilidad de los mapeos:
+
+```powershell
+node --import tsx --test tests\AnalogMappings.test.ts
+```
+
+## Vista de instrumentos digitales
+
+Digitales muestra un árbol por instrumento con la carpeta Alarma (Activada,
+DelayActivacion, DelayDesactivacion, Habilitada e Intlk_1 a Intlk_5), además de
+Config, Habilitado, NoAlarma, Valor y el registro de valor completo. ID representa
+el número de instrumento, no un registro adicional. Nombre se omite porque no
+existe un mapeo asociado.
+
+Los metadatos `instrument.bits` identifican los bits de configuración y de valor
+según el PLC. Cada bit muestra la dirección `registro.bit`; los delays se muestran
+en sus valores originales, sin conversión de unidades. La vista no escribe en
+memoria ni altera la simulación. La búsqueda y la conservación de nodos abiertos
+funcionan igual que en Analógicos. Directos conserva el listado de registros.
+
+```powershell
+node --import tsx --test tests\AnalogMappings.test.ts tests\DigitalMappings.test.ts
+```

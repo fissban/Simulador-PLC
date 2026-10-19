@@ -1,5 +1,7 @@
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import type { RegisterRow, RegistersResponse } from "../types";
+import { AnalogInstrumentTree } from "./AnalogInstrumentTree";
+import { DigitalInstrumentTree } from "./DigitalInstrumentTree";
 
 const REFRESH_INTERVAL_MS = 1000;
 const MAPPING_GROUPS = [
@@ -18,6 +20,14 @@ export function ModbusMapView()
     const [search, setSearch] = createSignal("");
     const [activeGroup, setActiveGroup] = createSignal<MappingGroup>("Analogico");
     const groupRows = createMemo(() => rows().filter((row) => row.group === activeGroup()));
+    const analogRows = createMemo(() => rows().filter((row) => row.group === "Analogico"));
+    const digitalRows = createMemo(() => rows().filter((row) => row.group === "Digital"));
+    const analogInstrumentCount = createMemo(() =>
+        new Set(analogRows().flatMap((row) => row.instrument ? [row.instrument.number] : [])).size
+    );
+    const digitalInstrumentCount = createMemo(() =>
+        new Set(digitalRows().flatMap((row) => row.instrument ? [row.instrument.number] : [])).size
+    );
 
     const filteredRows = createMemo(() =>
     {
@@ -147,7 +157,12 @@ export function ModbusMapView()
                         }}
                     >
                         <span>{group.label}</span>
-                        <strong>{rows().filter((row) => row.group === group.value).length}</strong>
+                        <strong>
+                            {group.value === "Analogico"
+                                ? `${analogInstrumentCount()} instrumentos`
+                                : group.value === "Digital" ? `${digitalInstrumentCount()} instrumentos`
+                                    : `${rows().filter((row) => row.group === group.value).length} registros`}
+                        </strong>
                     </button>
                 ))}
             </div>
@@ -160,7 +175,25 @@ export function ModbusMapView()
             >
                 {error() && <div class="empty-state">Error al cargar registros: {error()}</div>}
 
-                {!error() && (
+                <div hidden={activeGroup() !== "Analogico" || !!error()}>
+                    <AnalogInstrumentTree
+                        rows={analogRows()}
+                        search={search()}
+                        isLoading={isLoading()}
+                        autoRefresh={autoRefresh()}
+                    />
+                </div>
+
+                <div hidden={activeGroup() !== "Digital" || !!error()}>
+                    <DigitalInstrumentTree
+                        rows={digitalRows()}
+                        search={search()}
+                        isLoading={isLoading()}
+                        autoRefresh={autoRefresh()}
+                    />
+                </div>
+
+                {!error() && activeGroup() === "Directo" && (
                     <div class="st-monitor-table-wrap">
                         <table class="st-monitor-table">
                             <thead>
@@ -196,7 +229,7 @@ export function ModbusMapView()
                     </div>
                 )}
 
-                <div class="st-monitor-meta">
+                <div class="st-monitor-meta" hidden={activeGroup() !== "Directo"}>
                     {isLoading()
                         ? "Cargando registros..."
                         : `${filteredRows().length} de ${groupRows().length} registros del grupo mostrados${autoRefresh() ? " · actualización en tiempo real" : ""}`}

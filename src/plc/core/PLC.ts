@@ -1,5 +1,6 @@
 import { AddresType, DataModel } from "./DataModel";
 import { mappingManager } from "../../memory/MappingManager";
+import type { InstrumentMapping } from "../../memory/MappingManager";
 
 export abstract class PLC
 {
@@ -101,13 +102,14 @@ export abstract class PLC
      * @param name Nombre de la variable.
      * @param address Dirección de memoria.
      * @param type Tipo de dirección.
+     * @param instrument Metadatos opcionales para la vista por instrumento.
      * @returns Objeto DataModel con la dirección y el tipo.
      */
-    protected createAddress(name: string, address: number, type: AddresType): DataModel
+    protected createAddress(name: string, address: number, type: AddresType, instrument?: InstrumentMapping): DataModel
     {
         const data = new DataModel(name,address, type);
         // Registrar el mapeo con un nombre único para la dirección
-        mappingManager.registerMapping(`${name}`, data);
+        mappingManager.registerMapping(`${name}`, data, instrument);
 
         return data;
     }

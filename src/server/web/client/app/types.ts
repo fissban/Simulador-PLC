@@ -6,6 +6,12 @@ export type RegisterRow = {
     type: string;
     name: string;
     group: string;
+    instrument?: {
+        number: number;
+        field: string;
+        alarmBits?: Record<string, number>;
+        bits?: Record<string, number>;
+    };
     description: string;
     writable: string;
     runtimeFunction: string;

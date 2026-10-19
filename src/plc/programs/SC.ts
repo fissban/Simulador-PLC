@@ -63,6 +63,12 @@ export abstract class SC extends PLC
         this.estadoEnsayo = this.createAddress("D_ESTADO_ENSAYO", 312, AddresType.HR);
         this.tensionBateria = this.createAddress("D_TENSION_BATERIA", 2886, AddresType.HR);
         // ================== ANALOGICOS ================== //
+        const alarmBits = {
+            HH: this.IA_CONFIG_ALARM_POS_HIHI,
+            H: this.IA_CONFIG_ALARM_POS_HI,
+            L: this.IA_CONFIG_ALARM_POS_LO,
+            LL: this.IA_CONFIG_ALARM_POS_LOLO
+        };
         this.analogicos.length = 0;
         for (let i = 1; i <= this.IA_SIZE; i++)
         {
@@ -71,19 +77,19 @@ export abstract class SC extends PLC
 
             const instrumento: Analogico =
             {
-                input: this.createAddress(`IA_INPUT_${i}`, 10000 + stepHRF, AddresType.HRF),
-                valor: this.createAddress(`IA_VALOR_${i}`, 2600 + stepHRF, AddresType.HRF),
-                config: this.createAddress(`IA_CONFIG_${i}`, 101 + stepHR, AddresType.HR),
-                estado: this.createAddress(`IA_ESTADO_${i}`, 2372 + stepHR, AddresType.HR),
-                rangoMin: this.createAddress(`IA_RANGO_MIN_${i}`, 340 + stepHRF, AddresType.HRF),
-                rangoMax: this.createAddress(`IA_RANGO_MAX_${i}`, 440 + stepHRF, AddresType.HRF),
-                ingenieriaMin: this.createAddress(`IA_INGENIERIA_MIN_${i}`, 540 + stepHRF, AddresType.HRF),
-                ingenieriaMax: this.createAddress(`IA_INGENIERIA_MAX_${i}`, 640 + stepHRF, AddresType.HRF),
-                setPointHh: this.createAddress(`IA_SET_POINT_HH_${i}`, 740 + stepHRF, AddresType.HRF),
-                setPointH: this.createAddress(`IA_SET_POINT_H_${i}`, 840 + stepHRF, AddresType.HRF),
-                setPointL: this.createAddress(`IA_SET_POINT_L_${i}`, 940 + stepHRF, AddresType.HRF),
-                setPointLl: this.createAddress(`IA_SET_POINT_LL_${i}`, 1040 + stepHRF, AddresType.HRF),
-                deadBand: this.createAddress(`IA_DEAD_BAND_${i}`, 1140 + stepHRF, AddresType.HRF)
+                input: this.createAddress(`IA_INPUT_${i}`, 10000 + stepHRF, AddresType.HRF, { number: i, field: "input" }),
+                valor: this.createAddress(`IA_VALOR_${i}`, 2600 + stepHRF, AddresType.HRF, { number: i, field: "valor" }),
+                config: this.createAddress(`IA_CONFIG_${i}`, 101 + stepHR, AddresType.HR, { number: i, field: "config", alarmBits }),
+                estado: this.createAddress(`IA_ESTADO_${i}`, 2372 + stepHR, AddresType.HR, { number: i, field: "estado", alarmBits }),
+                rangoMin: this.createAddress(`IA_RANGO_MIN_${i}`, 340 + stepHRF, AddresType.HRF, { number: i, field: "rangoMin" }),
+                rangoMax: this.createAddress(`IA_RANGO_MAX_${i}`, 440 + stepHRF, AddresType.HRF, { number: i, field: "rangoMax" }),
+                ingenieriaMin: this.createAddress(`IA_INGENIERIA_MIN_${i}`, 540 + stepHRF, AddresType.HRF, { number: i, field: "ingenieriaMin" }),
+                ingenieriaMax: this.createAddress(`IA_INGENIERIA_MAX_${i}`, 640 + stepHRF, AddresType.HRF, { number: i, field: "ingenieriaMax" }),
+                setPointHh: this.createAddress(`IA_SET_POINT_HH_${i}`, 740 + stepHRF, AddresType.HRF, { number: i, field: "setPointHh" }),
+                setPointH: this.createAddress(`IA_SET_POINT_H_${i}`, 840 + stepHRF, AddresType.HRF, { number: i, field: "setPointH" }),
+                setPointL: this.createAddress(`IA_SET_POINT_L_${i}`, 940 + stepHRF, AddresType.HRF, { number: i, field: "setPointL" }),
+                setPointLl: this.createAddress(`IA_SET_POINT_LL_${i}`, 1040 + stepHRF, AddresType.HRF, { number: i, field: "setPointLl" }),
+                deadBand: this.createAddress(`IA_DEAD_BAND_${i}`, 1140 + stepHRF, AddresType.HRF, { number: i, field: "deadBand" })
             };
             instrumento.rangoMin.write(0);
             instrumento.rangoMax.write(Math.floor(Math.random() * 4000));
@@ -92,6 +98,12 @@ export abstract class SC extends PLC
             this.analogicos.push(instrumento);
         }
 
+        const digitalConfigBits = {
+            habilitado: this.ID_CONFIG_POS_HABILITADO,
+            noAlarma: this.ID_CONFIG_POS_NO_ALARMA,
+            habilitada: this.ID_CONFIG_POS_HABILITADA,
+            ...Object.fromEntries(this.ID_CONFIG_POS_INTERLOCKS.map((position, index) => [`intlk${index + 1}`, position]))
+        };
         this.digitales.length = 0;
         for (let i = 1; i <= this.ID_SIZE; i++)
         {
@@ -99,10 +111,10 @@ export abstract class SC extends PLC
 
             const digital: Digital =
             {
-                config: this.createAddress(`ID_CONFIG_${i}`, 152 + stepHR, AddresType.HR),
-                valor: this.createAddress(`ID_VALOR_${i}`, 2422 + stepHR, AddresType.HR),
-                delayActivacion: this.createAddress(`ID_DELAY_ACTIVACION_${i}`, 2522 + stepHR, AddresType.HR),
-                delayDesactivacion: this.createAddress(`ID_DELAY_DESACTIVACION_${i}`, 2622 + stepHR, AddresType.HR),
+                config: this.createAddress(`ID_CONFIG_${i}`, 152 + stepHR, AddresType.HR, { number: i, field: "config", bits: digitalConfigBits }),
+                valor: this.createAddress(`ID_VALOR_${i}`, 2422 + stepHR, AddresType.HR, { number: i, field: "valor", bits: { valor: 0, activada: 1 } }),
+                delayActivacion: this.createAddress(`ID_DELAY_ACTIVACION_${i}`, 2522 + stepHR, AddresType.HR, { number: i, field: "delayActivacion" }),
+                delayDesactivacion: this.createAddress(`ID_DELAY_DESACTIVACION_${i}`, 2622 + stepHR, AddresType.HR, { number: i, field: "delayDesactivacion" }),
                 activacionPendienteDesde: null,
             };
             digital.delayActivacion.write(0);
