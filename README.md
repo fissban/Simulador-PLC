@@ -36,6 +36,7 @@ Web de monitoreo:
 
 - URL: `http://localhost:8080` (o el `webPort` configurado)
 - Muestra el estado actual expuesto por la API del simulador
+- El mapa Modbus se divide en pestañas de Analógicos, Digitales y Directos, con búsqueda por grupo y actualización en tiempo real.
 
 ### Producción
 

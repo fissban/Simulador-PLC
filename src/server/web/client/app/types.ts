@@ -5,6 +5,7 @@ export type RegisterRow = {
     formattedAddress: string;
     type: string;
     name: string;
+    group: string;
     description: string;
     writable: string;
     runtimeFunction: string;

@@ -12,6 +12,7 @@ interface RegisterRow
     formattedAddress: string;
     type: string;
     name: string;
+    group: string;
     description: string;
     writable: string;
     runtimeFunction: string;
@@ -65,8 +66,9 @@ function buildRows(): RegisterRow[]
         return {
             address: entry.address,
             formattedAddress: String(entry.address),
-            type: getTypeLabel(entry.type),
+            type: getTypeLabel(entry.addressType),
             name: entry.name,
+            group: entry.group,
             description: "",
             writable: "",
             runtimeFunction: "",

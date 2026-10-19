@@ -87,10 +87,10 @@ export abstract class PLC
         return Array.from({ length: count }, (_, index) =>
         {
             const step = type == AddresType.HRF ? 2 : 1;
-
-            const data = new DataModel(addressStart + (index * step), type);
+            let nameModel = `${name}_${mappingIndexStart + index}`;
+            const data = new DataModel(nameModel, addressStart + (index * step), type);
             // Registrar el mapeo con un nombre único para cada dirección en el rango
-            mappingManager.registerMapping(`${name}_${mappingIndexStart + index}`, data);
+            mappingManager.registerMapping(nameModel, data);
 
             return data;
         });
@@ -105,7 +105,7 @@ export abstract class PLC
      */
     protected createAddress(name: string, address: number, type: AddresType): DataModel
     {
-        const data = new DataModel(address, type);
+        const data = new DataModel(name,address, type);
         // Registrar el mapeo con un nombre único para la dirección
         mappingManager.registerMapping(`${name}`, data);
 

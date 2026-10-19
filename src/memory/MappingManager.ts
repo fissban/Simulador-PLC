@@ -1,6 +1,8 @@
 import { AddresType, DataModel } from "../plc/core/DataModel";
 import { bufferManager } from "./BufferManager";
 
+
+
 /**
  * Snapshot de un mapeo registrado, pensado para exponerlo hacia la web.
  */
@@ -8,8 +10,9 @@ export interface MappingSnapshot
 {
     name: string;
     address: number;
-    type: AddresType;
+    addressType: AddresType;
     value: number;
+    group: string;
 }
 
 class MappingManager
@@ -46,7 +49,7 @@ class MappingManager
     public getAddressByName(name: string): number | undefined
     {
         const data = this.mapping.get(name);
-        return data ? data.address : undefined;
+        return data ? data.getAddress() : undefined;
     }
 
     public getValueByName(name: string): number | undefined
@@ -64,9 +67,10 @@ class MappingManager
     {
         return Array.from(this.mapping.entries()).map(([name, data]) => ({
             name,
-            address: data.address,
-            type: data.type,
-            value: data.read()
+            address: data.getAddress(),
+            addressType: data.getAddressType(),
+            value: data.read(),
+            group: data.getGroup()
         }));
     }
 }
