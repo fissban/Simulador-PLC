@@ -68,44 +68,47 @@ class BufferManager
      */
     public read(data: DataModel, bit?: number): number
     {
+        const address = data.getAddress();
         const bitIndex = bit ?? 0;
 
-        switch (data.type)
+        switch (data.getAddressType())
         {
             case AddresType.C:
-                return this.getCoil(data.address) ? 1 : 0;
+                return this.getCoil(address) ? 1 : 0;
             case AddresType.B:
-                return this.getBit(data.address, bitIndex) ? 1 : 0;
+                return this.getBit(address, bitIndex) ? 1 : 0;
             case AddresType.HR:
-                if (bit !== undefined) return this.getBit(data.address, bitIndex) ? 1 : 0;
-                return this.getInt16(data.address);
+                if (bit !== undefined) return this.getBit(address, bitIndex) ? 1 : 0;
+                return this.getInt16(address);
             case AddresType.HRF:
-                return this.getFloat32(data.address);
+                return this.getFloat32(address);
             default:
                 return 0;
         }
     }
 
-        /**
+    /**
      * Escribe un valor en la dirección indicada respetando el tipo de dato.
      * Para `B` y `C` cualquier valor mayor a cero se interpreta como activo.
      */
     public write(data: DataModel, value: number)
     {
-        switch (data.type)
+        const address = data.getAddress();
+
+        switch (data.getAddressType())
         {
             case AddresType.B:
                 // TODO sin soporte para escribir bits individuales en HR. Actualmente, cualquier valor mayor a cero activa el bit completo.
-                //this.setBit(data.address, value > 0);
+                //this.setBit(address, value > 0);
                 break;
             case AddresType.C:
-                this.setCoil(data.address, value > 0);
+                this.setCoil(address, value > 0);
                 break;
             case AddresType.HR:
-                this.setInt16(data.address, value);
+                this.setInt16(address, value);
                 break;
             case AddresType.HRF:
-                this.setFloat32(data.address, value);
+                this.setFloat32(address, value);
                 break;
         }
     }
@@ -195,4 +198,3 @@ class BufferManager
 }
 
 export const bufferManager = new BufferManager();
-

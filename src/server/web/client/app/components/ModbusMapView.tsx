@@ -1,7 +1,15 @@
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import type { RegisterRow, RegistersResponse } from "../types";
+import { AnalogInstrumentTree } from "./AnalogInstrumentTree";
+import { DigitalInstrumentTree } from "./DigitalInstrumentTree";
 
 const REFRESH_INTERVAL_MS = 1000;
+const MAPPING_GROUPS = [
+    { value: "Analogico", label: "Analógicos" },
+    { value: "Digital", label: "Digitales" },
+    { value: "Directo", label: "Directos" }
+] as const;
+type MappingGroup = typeof MAPPING_GROUPS[number]["value"];
 
 export function ModbusMapView()
 {
@@ -10,17 +18,26 @@ export function ModbusMapView()
     const [error, setError] = createSignal("");
     const [autoRefresh, setAutoRefresh] = createSignal(true);
     const [search, setSearch] = createSignal("");
+    const [activeGroup, setActiveGroup] = createSignal<MappingGroup>("Analogico");
+    const groupRows = createMemo(() => rows().filter((row) => row.group === activeGroup()));
+    const analogRows = createMemo(() => rows().filter((row) => row.group === "Analogico"));
+    const digitalRows = createMemo(() => rows().filter((row) => row.group === "Digital"));
+    const analogInstrumentCount = createMemo(() =>
+        new Set(analogRows().flatMap((row) => row.instrument ? [row.instrument.number] : [])).size
+    );
+    const digitalInstrumentCount = createMemo(() =>
+        new Set(digitalRows().flatMap((row) => row.instrument ? [row.instrument.number] : [])).size
+    );
 
-    // Filtra las filas por el texto de búsqueda (dir., nombre, tipo, valor, desc.).
     const filteredRows = createMemo(() =>
     {
         const term = search().trim().toLowerCase();
         if (!term)
         {
-            return rows();
+            return groupRows();
         }
 
-        return rows().filter((row) =>
+        return groupRows().filter((row) =>
             row.formattedAddress.toLowerCase().includes(term) ||
             row.name.toLowerCase().includes(term) ||
             row.type.toLowerCase().includes(term) ||
@@ -106,39 +123,117 @@ export function ModbusMapView()
                 </button>
             </div>
 
-            {error() && <div class="empty-state">Error al cargar registros: {error()}</div>}
+            <div class="group-tabs" role="tablist" aria-label="Grupos de mapeos">
+                {MAPPING_GROUPS.map((group, index) => (
+                    <button
+                        id={`mapping-tab-${group.value}`}
+                        class="group-tab"
+                        classList={{ active: activeGroup() === group.value }}
+                        type="button"
+                        role="tab"
+                        aria-selected={activeGroup() === group.value}
+                        aria-controls="mapping-group-panel"
+                        tabIndex={activeGroup() === group.value ? 0 : -1}
+                        onClick={() => setActiveGroup(group.value)}
+                        onKeyDown={(event) =>
+                        {
+                            let nextIndex: number;
+                            switch (event.key)
+                            {
+                                case "ArrowDown":
+                                case "ArrowRight": nextIndex = (index + 1) % MAPPING_GROUPS.length; break;
+                                case "ArrowUp":
+                                case "ArrowLeft": nextIndex = (index + MAPPING_GROUPS.length - 1) % MAPPING_GROUPS.length; break;
+                                case "Home": nextIndex = 0; break;
+                                case "End": nextIndex = MAPPING_GROUPS.length - 1; break;
+                                default: return;
+                            }
 
-            {!error() && (
-                <div class="st-monitor-table-wrap">
-                    <table class="st-monitor-table">
-                        <thead>
-                            <tr>
-                                <th>Dirección</th>
-                                <th>Nombre</th>
-                                <th>Tipo</th>
-                                <th>Valor</th>
-                                <th>Descripción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredRows().map((row) => (
-                                <tr>
-                                    <td>{row.formattedAddress}</td>
-                                    <td>{row.name}</td>
-                                    <td>{row.type}</td>
-                                    <td>{row.value}</td>
-                                    <td>{row.description}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            event.preventDefault();
+                            const nextGroup = MAPPING_GROUPS[nextIndex];
+                            setActiveGroup(nextGroup.value);
+                            event.currentTarget.parentElement
+                                ?.querySelector<HTMLButtonElement>(`#mapping-tab-${nextGroup.value}`)?.focus();
+                        }}
+                    >
+                        <span>{group.label}</span>
+                        <strong>
+                            {group.value === "Analogico"
+                                ? `${analogInstrumentCount()} instrumentos`
+                                : group.value === "Digital" ? `${digitalInstrumentCount()} instrumentos`
+                                    : `${rows().filter((row) => row.group === group.value).length} registros`}
+                        </strong>
+                    </button>
+                ))}
+            </div>
+
+            <div
+                id="mapping-group-panel"
+                role="tabpanel"
+                aria-labelledby={`mapping-tab-${activeGroup()}`}
+                tabIndex={0}
+            >
+                {error() && <div class="empty-state">Error al cargar registros: {error()}</div>}
+
+                <div hidden={activeGroup() !== "Analogico" || !!error()}>
+                    <AnalogInstrumentTree
+                        rows={analogRows()}
+                        search={search()}
+                        isLoading={isLoading()}
+                        autoRefresh={autoRefresh()}
+                    />
                 </div>
-            )}
 
-            <div class="st-monitor-meta">
-                {isLoading()
-                    ? "Cargando registros..."
-                    : `${filteredRows().length} de ${rows().length} registros mostrados${autoRefresh() ? " · actualización en tiempo real" : ""}`}
+                <div hidden={activeGroup() !== "Digital" || !!error()}>
+                    <DigitalInstrumentTree
+                        rows={digitalRows()}
+                        search={search()}
+                        isLoading={isLoading()}
+                        autoRefresh={autoRefresh()}
+                    />
+                </div>
+
+                {!error() && activeGroup() === "Directo" && (
+                    <div class="st-monitor-table-wrap">
+                        <table class="st-monitor-table">
+                            <thead>
+                                <tr>
+                                    <th>Dirección</th>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Valor</th>
+                                    <th>Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {!isLoading() && filteredRows().length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} class="empty-state">
+                                            {groupRows().length === 0
+                                                ? "No hay registros en este grupo."
+                                                : "No hay registros que coincidan con la búsqueda."}
+                                        </td>
+                                    </tr>
+                                )}
+                                {filteredRows().map((row) => (
+                                    <tr>
+                                        <td>{row.formattedAddress}</td>
+                                        <td>{row.name}</td>
+                                        <td>{row.type}</td>
+                                        <td>{row.value}</td>
+                                        <td>{row.description}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                <div class="st-monitor-meta" hidden={activeGroup() !== "Directo"}>
+                    {isLoading()
+                        ? "Cargando registros..."
+                        : `${filteredRows().length} de ${groupRows().length} registros del grupo mostrados${autoRefresh() ? " · actualización en tiempo real" : ""}`}
+                </div>
             </div>
         </section>
     );

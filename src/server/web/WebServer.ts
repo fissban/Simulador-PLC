@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { serverConfigManager } from "../../config/ServerConfigManager";
 import { mappingManager } from "../../memory/MappingManager";
+import type { InstrumentMapping } from "../../memory/MappingManager";
 import { AddresType } from "../../plc/core/DataModel";
 import { simulatorManager } from "../../plc/managers/SimulatorManager";
 
@@ -12,6 +13,8 @@ interface RegisterRow
     formattedAddress: string;
     type: string;
     name: string;
+    group: string;
+    instrument?: InstrumentMapping;
     description: string;
     writable: string;
     runtimeFunction: string;
@@ -65,8 +68,10 @@ function buildRows(): RegisterRow[]
         return {
             address: entry.address,
             formattedAddress: String(entry.address),
-            type: getTypeLabel(entry.type),
+            type: getTypeLabel(entry.addressType),
             name: entry.name,
+            group: entry.group,
+            instrument: entry.instrument,
             description: "",
             writable: "",
             runtimeFunction: "",

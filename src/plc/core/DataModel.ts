@@ -2,10 +2,18 @@ import { bufferManager } from "../../memory/BufferManager";
 
 export enum AddresType
 {
-    C, // Coil - 1 bit
-    HR, // Holding Register - 16 bits
-    HRF, // Holding Register Float - 32 bits
-    B, // Bit - 1 bit
+    C= 'C', // Coil - 1 bit
+    HR = 'HR', // Holding Register - 16 bits
+    HRF = 'HRF', // Holding Register Float - 32 bits
+    B = 'B', // Bit - 1 bit
+}
+
+export enum Group
+{
+    NONE = 'None',
+    ANALOGICO = 'Analogico',
+    DIGITAL = 'Digital',
+    DIRECTO = 'Directo'
 }
 
 /**
@@ -19,10 +27,51 @@ export enum AddresType
  */
 export class DataModel
 {
-    constructor(
-        public address: number,
-        public type: AddresType
-    ) { }
+    private name: string;
+    private address: number;
+    private addressType: AddresType;
+
+    private group: Group = Group.NONE;
+
+    constructor(name: string, address: number, addressType: AddresType)
+    {
+        this.name = name;
+        this.address = address;
+        this.addressType = addressType;
+
+        if (this.name.startsWith("IA"))
+        {
+            this.group = Group.ANALOGICO;
+        }
+        else if (this.name.startsWith("ID"))
+        {
+            this.group = Group.DIGITAL;
+        }
+        else if (this.name.startsWith("D"))
+        {
+            this.group = Group.DIRECTO;
+        }
+    }
+
+    public getAddress(): number
+    {
+        return this.address;
+    }
+
+    public getAddressType(): AddresType
+    {
+        return this.addressType;
+    }
+
+    public getName(): string
+    {
+        return this.name;
+    }
+
+    public getGroup(): Group
+    {
+        return this.group;
+    }
 
     /**
      * Lee el valor asociado a esta dirección de memoria.

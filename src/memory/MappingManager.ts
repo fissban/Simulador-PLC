@@ -1,6 +1,14 @@
 import { AddresType, DataModel } from "../plc/core/DataModel";
 import { bufferManager } from "./BufferManager";
 
+export interface InstrumentMapping
+{
+    number: number;
+    field: string;
+    alarmBits?: Record<string, number>;
+    bits?: Record<string, number>;
+}
+
 /**
  * Snapshot de un mapeo registrado, pensado para exponerlo hacia la web.
  */
@@ -8,25 +16,28 @@ export interface MappingSnapshot
 {
     name: string;
     address: number;
-    type: AddresType;
+    addressType: AddresType;
     value: number;
+    group: string;
+    instrument?: InstrumentMapping;
 }
 
 class MappingManager
 {
     /**
-     *  Map<Nombre, Address>
+     * Mapeos y metadatos registrados por nombre.
      */
-    private mapping: Map<string, DataModel> = new Map();
+    private mapping: Map<string, { data: DataModel; instrument?: InstrumentMapping }> = new Map();
 
     /**
      * Agrega un mapeo entre un nombre y una dirección.
      * @param name Nombre de la variable.
-     * @param address Dirección asociada.
+     * @param data Dirección asociada.
+     * @param instrument Instrumento y campo representados por el mapeo.
      */
-    public registerMapping(name: string, data: DataModel): void
+    public registerMapping(name: string, data: DataModel, instrument?: InstrumentMapping): void
     {
-        this.mapping.set(name, data);
+        this.mapping.set(data.getName(), { data, instrument });
     }
 
     /**
@@ -45,15 +56,14 @@ class MappingManager
      */
     public getAddressByName(name: string): number | undefined
     {
-        const data = this.mapping.get(name);
-        return data ? data.address : undefined;
+        return this.mapping.get(name)?.data.getAddress();
     }
 
     public getValueByName(name: string): number | undefined
     {
-        const data = this.mapping.get(name);
-        if (!data) return undefined;
-        return bufferManager.read(data);
+        const entry = this.mapping.get(name);
+        if (!entry) return undefined;
+        return bufferManager.read(entry.data);
     }
 
     /**
@@ -62,11 +72,13 @@ class MappingManager
      */
     public getAll(): MappingSnapshot[]
     {
-        return Array.from(this.mapping.entries()).map(([name, data]) => ({
+        return Array.from(this.mapping.entries()).map(([name, { data, instrument }]) => ({
             name,
-            address: data.address,
-            type: data.type,
-            value: data.read()
+            address: data.getAddress(),
+            addressType: data.getAddressType(),
+            value: data.read(),
+            group: data.getGroup(),
+            instrument
         }));
     }
 }
