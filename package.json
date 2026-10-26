@@ -5,11 +5,12 @@
     "description": "Simulador PLC con servidor Modbus TCP",
     "main": "dist/index.js",
     "scripts": {
+        "start": "node dist/index.js",
         "server": "tsx watch src/index.ts",
         "web": "vite",
         "build:server": "tsc -p tsconfig.json",
         "build:web": "vite build",
-        "build": "npm run build:server && npm run build:web"
+        "build": "npm run build:server && npm run build:web && node scripts/package-deploy.mjs"
     },
     "keywords": [
         "plc",

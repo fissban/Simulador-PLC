@@ -136,13 +136,14 @@ export abstract class SC extends PLC
         // la medición bruta llegada desde el instrumento/campo, oscilando
         // dentro del rango crudo configurado para el canal.
         const elapsedMs = Date.now();
-        this.analogicos.forEach((analogico) =>
+        this.analogicos.forEach((analogico, index) =>
         {
             // Límites del rango crudo del instrumento (ej. 0..600).
             const rawMin = analogico.rangoMin.read();
             const rawMax = analogico.rangoMax.read();
-            // Onda senoidal que oscila dentro del rango crudo del canal.
-            const value = this.sine(elapsedMs, rawMin, rawMax);
+            // Desfase uniforme para que los canales no alcancen el máximo a la vez.
+            const phaseOffsetMs = index * this.WAVE_PERIOD_MS / Math.floor(Math.random() * this.analogicos.length + 1);
+            const value = this.sine(elapsedMs + phaseOffsetMs, rawMin, rawMax);
             analogico.input.write(value);
         });
 
@@ -181,7 +182,7 @@ export abstract class SC extends PLC
             {
                 this.updateAlarmState(analogico);
             }
-            
+
         });
 
         // ================== DIGITALES ================== //

@@ -65,11 +65,12 @@ npm install
 
 | Script | Descripción |
 |---|---|
+| `npm start` | Ejecuta el backend y la web previamente compilados |
 | `npm run server` | Levanta el backend (Modbus + API web) con `tsx watch`, recargando ante cambios |
 | `npm run web` | Levanta Vite en `http://localhost:4173` con proxy de `/api` al backend |
 | `npm run build:server` | Compila el backend a `dist/` |
 | `npm run build:web` | Compila la web a `dist/server/web/public` |
-| `npm run build` | Compila backend y web |
+| `npm run build` | Compila backend y web y genera `deploy/` lista para subir |
 
 ### Desarrollo
 
@@ -95,6 +96,41 @@ node dist/index.js
 
 La web queda disponible en `http://localhost:8080` (o el `webPort` configurado) y el
 servidor Modbus en el `port` configurado.
+
+### Subir la aplicación compilada a un servidor
+
+Ejecutar `npm run build` en la PC genera esta carpeta:
+
+```text
+deploy/
+├── dist/                  # Backend y web compilados
+├── config/                # Configuración, incluida server-config.json
+├── package.json
+└── package-lock.json
+```
+
+Subir únicamente el contenido de `deploy/` a una carpeta del servidor, por ejemplo
+`simulador-plc`, mediante SFTP (WinSCP). No copiar `node_modules` desde Windows.
+El `package.json` de `deploy/` solo contiene `npm start`: compilar siempre desde la
+raíz del proyecto, no desde la carpeta de despliegue.
+En el servidor se necesita Node.js y npm, pero no las herramientas de compilación:
+
+```bash
+cd ~/simulador-plc
+npm ci --omit=dev
+npm start
+```
+
+Antes de iniciar, revisar `config/server-config.json`: la configuración se copia
+sin modificar. Para acceder únicamente mediante un túnel SSH, usar
+`"host": "127.0.0.1"` y `"port": 5020`, evitando permisos elevados y la exposición
+directa de Modbus y la API sin autenticación.
+
+Cada build reemplaza por completo la carpeta local `deploy/`; no guardar allí
+archivos propios. Al actualizar el servidor, conservar su configuración si es
+distinta de la local y reiniciar el servicio después de subir los archivos.
+`npm start` ejecuta en primer plano; para mantenerlo activo al cerrar SSH y
+arrancar con el sistema, configurar un servicio (por ejemplo, systemd).
 
 ### Secuencia de arranque
 
