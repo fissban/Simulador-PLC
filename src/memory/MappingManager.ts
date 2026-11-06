@@ -1,5 +1,4 @@
 import { AddresType, DataModel } from "../plc/core/DataModel";
-import { bufferManager } from "./BufferManager";
 
 export interface InstrumentMapping
 {
@@ -22,7 +21,10 @@ export interface MappingSnapshot
     instrument?: InstrumentMapping;
 }
 
-class MappingManager
+/**
+ * Registro nombre -> dirección de una instancia del simulador.
+ */
+export class MappingManager
 {
     /**
      * Mapeos y metadatos registrados por nombre.
@@ -63,7 +65,7 @@ class MappingManager
     {
         const entry = this.mapping.get(name);
         if (!entry) return undefined;
-        return bufferManager.read(entry.data);
+        return entry.data.read();
     }
 
     /**
@@ -82,5 +84,3 @@ class MappingManager
         }));
     }
 }
-
-export const mappingManager = new MappingManager();

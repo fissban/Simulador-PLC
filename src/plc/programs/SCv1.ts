@@ -1,5 +1,6 @@
 import { AddresType, DataModel } from "../core/DataModel";
 import { SC } from "./SC";
+import type { PlcContext } from "../core/PLC";
 
 interface VSS
 {
@@ -87,14 +88,17 @@ export class SCv1 extends SC
     readonly NUMERO_DE_PILETAS_FISICAS = 1;
     piletas: Pileta[] = [];
 
-    constructor(scanIntervalMs: number = 250)
+    constructor(context: PlcContext, scanIntervalMs: number = 250)
     {
-        super(scanIntervalMs);
+        super(context, scanIntervalMs);
     }
 
     init(): void
     {
         super.init();
+
+        this.vss.length = 0;
+        this.piletas.length = 0;
 
         for (let i = 1; i <= this.VSS_SIZE; i++)
         {

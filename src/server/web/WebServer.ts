@@ -2,10 +2,10 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { serverConfigManager } from "../../config/ServerConfigManager";
-import { mappingManager } from "../../memory/MappingManager";
 import type { InstrumentMapping } from "../../memory/MappingManager";
 import { AddresType } from "../../plc/core/DataModel";
 import { simulatorManager } from "../../plc/managers/SimulatorManager";
+import type { SimulatorInstance } from "../../plc/managers/SimulatorInstance";
 
 interface RegisterRow
 {
@@ -59,11 +59,11 @@ function formatValue(value: number): string
 
 /**
  * Construye las filas a mostrar en la web a partir de todos los mapeos
- * registrados en `MappingManager`, leyendo su valor actual desde la memoria.
+ * de una instancia, leyendo su valor actual desde su memoria.
  */
-function buildRows(): RegisterRow[]
+function buildRows(instance: SimulatorInstance): RegisterRow[]
 {
-    return mappingManager.getAll().map((entry) =>
+    return instance.getMappings().map((entry) =>
     {
         return {
             address: entry.address,
@@ -168,10 +168,11 @@ function readJsonBody(req: http.IncomingMessage): Promise<any>
 }
 
 /**
- * Maneja las acciones de control del simulador recibidas por POST.
- * Body esperado: `{ action: "select" | "start" | "stop", id?: string }`.
+ * Maneja las acciones de control de una instancia recibidas por POST.
+ * Body esperado: `{ action: "select" | "selectAndStart" | "start" | "pause" | "stop", id?: string }`
+ * donde `id` es el id del programa a cargar.
  */
-async function handleSimulatorAction(req: http.IncomingMessage, res: http.ServerResponse): Promise<void>
+async function handleInstanceAction(instance: SimulatorInstance, req: http.IncomingMessage, res: http.ServerResponse): Promise<void>
 {
     let body: any;
     try { body = await readJsonBody(req); }
@@ -188,19 +189,19 @@ async function handleSimulatorAction(req: http.IncomingMessage, res: http.Server
         switch (action)
         {
             case "select":
-                sendJson(res, 200, simulatorManager.select(String(body.id)));
+                sendJson(res, 200, instance.select(String(body.id)));
                 return;
             case "selectAndStart":
-                sendJson(res, 200, simulatorManager.selectAndStart(String(body.id)));
+                sendJson(res, 200, instance.selectAndStart(String(body.id)));
                 return;
             case "start":
-                sendJson(res, 200, simulatorManager.start());
+                sendJson(res, 200, instance.start());
                 return;
             case "pause":
-                sendJson(res, 200, simulatorManager.pause());
+                sendJson(res, 200, instance.pause());
                 return;
             case "stop":
-                sendJson(res, 200, simulatorManager.stop());
+                sendJson(res, 200, instance.stop());
                 return;
             default:
                 sendJson(res, 400, { error: `Acción desconocida: "${action}"` });
@@ -222,28 +223,46 @@ export function startWebServer(): void
     {
         const requestUrl = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
 
-        if (requestUrl.pathname === "/api/registers" && req.method === "GET")
+        // Listado de instancias con su estado.
+        if (requestUrl.pathname === "/api/instances" && req.method === "GET")
         {
-            const rows = buildRows();
-            res.writeHead(200, {
-                "Content-Type": "application/json; charset=utf-8",
-                "Cache-Control": "no-store"
-            });
-            res.end(JSON.stringify({ rows }));
+            sendJson(res, 200, { instances: simulatorManager.getAllStatus() });
             return;
         }
 
-        // Estado del simulador y catálogo de programas.
-        if (requestUrl.pathname === "/api/simulator" && req.method === "GET")
+        // Rutas por instancia: /api/instances/:id y /api/instances/:id/registers
+        const instanceMatch = /^\/api\/instances\/([^/]+)(\/registers)?$/.exec(requestUrl.pathname);
+        if (instanceMatch)
         {
-            sendJson(res, 200, simulatorManager.getStatus());
-            return;
-        }
+            const instance = simulatorManager.get(decodeURIComponent(instanceMatch[1]));
+            if (!instance)
+            {
+                sendJson(res, 404, { error: `Instancia desconocida: "${decodeURIComponent(instanceMatch[1])}"` });
+                return;
+            }
 
-        // Acciones de control: select / start / stop.
-        if (requestUrl.pathname === "/api/simulator" && req.method === "POST")
-        {
-            void handleSimulatorAction(req, res);
+            const isRegisters = instanceMatch[2] !== undefined;
+
+            if (isRegisters && req.method === "GET")
+            {
+                sendJson(res, 200, { rows: buildRows(instance) });
+                return;
+            }
+
+            if (!isRegisters && req.method === "GET")
+            {
+                sendJson(res, 200, instance.getStatus());
+                return;
+            }
+
+            // Acciones de control: select / selectAndStart / start / pause / stop.
+            if (!isRegisters && req.method === "POST")
+            {
+                void handleInstanceAction(instance, req, res);
+                return;
+            }
+
+            sendJson(res, 405, { error: "Método no permitido." });
             return;
         }
 

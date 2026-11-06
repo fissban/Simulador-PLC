@@ -34,6 +34,9 @@ export type ProgramStatus = {
 export type SimulatorState = "running" | "paused" | "stopped";
 
 export type SimulatorStatus = {
+    id: string;
+    name: string;
+    port: number;
     activeId: string | null;
     activeName: string | null;
     running: boolean;

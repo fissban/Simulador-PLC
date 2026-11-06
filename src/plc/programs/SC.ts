@@ -1,4 +1,4 @@
-import { PLC } from "../core/PLC";
+import { PLC, PlcContext } from "../core/PLC";
 import { AddresType, DataModel } from "../core/DataModel";
 
 export interface Analogico
@@ -57,9 +57,9 @@ export abstract class SC extends PLC
 
     private readonly digitales: Digital[] = [];
 
-    constructor(scanIntervalMs: number = 250)
+    constructor(context: PlcContext, scanIntervalMs: number = 250)
     {
-        super(scanIntervalMs);
+        super(context, scanIntervalMs);
     }
 
     init(): void

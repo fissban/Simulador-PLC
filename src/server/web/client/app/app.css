@@ -1031,3 +1031,42 @@ tr:nth-child(even) td {
     color: #fca5a5;
     font-size: 0.85rem;
 }
+/* ===== Selector de instancias ===== */
+.instance-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+}
+
+.instance-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    background: var(--bg-soft);
+    border: 1px solid var(--panel-border);
+    border-radius: 999px;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.instance-tab small {
+    opacity: 0.65;
+}
+
+.instance-tab.active {
+    border-color: currentColor;
+    font-weight: 600;
+}
+
+.instance-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: #888;
+}
+
+.instance-dot.running { background: #2ea043; }
+.instance-dot.paused { background: #d29922; }

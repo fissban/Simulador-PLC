@@ -5,9 +5,10 @@ const REFRESH_INTERVAL_MS = 2000;
 
 /**
  * Panel de control del simulador: permite seleccionar qué programa (software)
- * ejecutar y arrancarlo/pararlo en caliente contra la API `/api/simulator`.
+ * ejecutar y arrancarlo/pararlo en caliente sobre una instancia, contra la API
+ * `/api/instances/:id`.
  */
-export function SimulatorControl()
+export function SimulatorControl(props: { instanceId: string })
 {
     const [status, setStatus] = createSignal<SimulatorStatus | null>(null);
     const [selectedId, setSelectedId] = createSignal<string>("");
@@ -28,7 +29,7 @@ export function SimulatorControl()
     {
         try
         {
-            const response = await fetch("/api/simulator");
+            const response = await fetch(`/api/instances/${encodeURIComponent(props.instanceId)}`);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             applyStatus((await response.json()) as SimulatorStatus);
             setError("");
@@ -45,7 +46,7 @@ export function SimulatorControl()
         setError("");
         try
         {
-            const response = await fetch("/api/simulator", {
+            const response = await fetch(`/api/instances/${encodeURIComponent(props.instanceId)}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action, id })
@@ -90,7 +91,7 @@ export function SimulatorControl()
     return (
         <section class="simulator-control">
             <div class="simulator-control-header">
-                <h2>Programa del PLC</h2>
+                <h2>{status()?.name ?? props.instanceId}{status() ? ` · puerto ${status()!.port}` : ""}</h2>
                 <span
                     class="simulator-state"
                     classList={{

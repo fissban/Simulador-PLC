@@ -1,4 +1,4 @@
-import { bufferManager } from "../../memory/BufferManager";
+import type { BufferManager } from "../../memory/BufferManager";
 
 export enum AddresType
 {
@@ -20,7 +20,7 @@ export enum Group
  * Representa una dirección de memoria del simulador junto con su tipo de dato.
  *
  * Además de almacenar la dirección y el tipo, expone métodos de alto nivel
- * `read()` / `write()` que delegan en el singleton `bufferManager` para acceder
+ * `read()` / `write()` que delegan en el `BufferManager` de su instancia para acceder
  * a la memoria real. De esta forma, el acceso a datos queda orientado a objetos
  * (`variable.read()` / `variable.write(valor)`), mientras que la lógica de
  * lectura/escritura sobre los buffers sigue centralizada en `BufferManager`.
@@ -32,9 +32,11 @@ export class DataModel
     private addressType: AddresType;
 
     private group: Group = Group.NONE;
+    private buffer: BufferManager;
 
-    constructor(name: string, address: number, addressType: AddresType)
+    constructor(name: string, address: number, addressType: AddresType, buffer: BufferManager)
     {
+        this.buffer = buffer;
         this.name = name;
         this.address = address;
         this.addressType = addressType;
@@ -80,7 +82,7 @@ export class DataModel
      */
     public read(bit?: number): number
     {
-        return bufferManager.read(this, bit);
+        return this.buffer.read(this, bit);
     }
 
     /**
@@ -89,6 +91,6 @@ export class DataModel
      */
     public write(value: number): void
     {
-        bufferManager.write(this, value);
+        this.buffer.write(this, value);
     }
 }

@@ -1,4 +1,4 @@
-import { PLC } from "../core/PLC";
+import { PLC, PlcContext } from "../core/PLC";
 import { SCv1 } from "../programs/SCv1";
 import { SCv2 } from "../programs/SCv2";
 
@@ -13,8 +13,8 @@ export interface ProgramDefinition
     name: string;
     /** Descripción breve de qué simula el programa. */
     description: string;
-    /** Crea una nueva instancia del programa. */
-    create: () => PLC;
+    /** Crea una nueva instancia del programa sobre la memoria y el mapa de una instancia. */
+    create: (context: PlcContext, scanIntervalMs?: number) => PLC;
 }
 
 /**
@@ -42,13 +42,13 @@ class ProgramManager
             id: "SCv1",
             name: "SCv1 - Señales Analógicas",
             description: "Simula instrumentos analógicos con escalado y alarmas (LOLO/LO/HI/HIHI).",
-            create: () => new SCv1()
+            create: (context, scanIntervalMs) => new SCv1(context, scanIntervalMs)
         },
         {
             id: "SCv2",
             name: "SCv2 - Señales Analógicas",
             description: "Simula instrumentos analógicos con escalado y alarmas (LOLO/LO/HI/HIHI).",
-            create: () => new SCv2()
+            create: (context, scanIntervalMs) => new SCv2(context, scanIntervalMs)
         }
     ];
 

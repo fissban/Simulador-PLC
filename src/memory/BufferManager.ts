@@ -26,11 +26,11 @@ import { AddresType, DataModel } from "../plc/core/DataModel";
  * estándar Modbus. Los métodos helper (get/set) validan el rango de direcciones
  * y devuelven valores seguros por defecto ante accesos fuera de límites.
  *
- * Se exporta una única instancia compartida (`bufferManager`) a modo de
- * singleton para que todos los módulos operen sobre la misma memoria.
+ * Cada instancia del simulador crea su propio `BufferManager`, de modo que
+ * varias instancias pueden convivir en el mismo proceso sin compartir memoria.
  * ============================================================================
  */
-class BufferManager
+export class BufferManager
 {
     // 1. Memoria unificada mediante Buffers
     COILS_QTY = 100;
@@ -197,4 +197,3 @@ class BufferManager
     }
 }
 
-export const bufferManager = new BufferManager();

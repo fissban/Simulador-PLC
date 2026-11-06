@@ -1,7 +1,22 @@
 {
-    "unitId": 1,
     "host": "0.0.0.0",
-    "port": 502,
-    "updateEveryMs": 200,
-    "webPort": 8080
+    "webPort": 8080,
+    "instances": [
+        {
+            "id": "plc-1",
+            "name": "PLC 1",
+            "program": "SCv1",
+            "port": 502,
+            "scanIntervalMs": 250,
+            "autoStart": true
+        },
+        {
+            "id": "plc-2",
+            "name": "PLC 2",
+            "program": "SCv2",
+            "port": 503,
+            "scanIntervalMs": 250,
+            "autoStart": true
+        }
+    ]
 }

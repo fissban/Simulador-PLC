@@ -1,6 +1,16 @@
 import { AddresType, DataModel } from "./DataModel";
-import { mappingManager } from "../../memory/MappingManager";
-import type { InstrumentMapping } from "../../memory/MappingManager";
+import type { BufferManager } from "../../memory/BufferManager";
+import type { InstrumentMapping, MappingManager } from "../../memory/MappingManager";
+
+/**
+ * Recursos propios de una instancia del simulador: su memoria y su mapa de
+ * direcciones. Se inyectan al programa para que varias instancias no compartan estado.
+ */
+export interface PlcContext
+{
+    buffer: BufferManager;
+    mapping: MappingManager;
+}
 
 export abstract class PLC
 {
@@ -15,8 +25,11 @@ export abstract class PLC
 
     private timer: NodeJS.Timeout | null = null;
 
-    constructor(scanIntervalMs: number = 250)
+    protected readonly context: PlcContext;
+
+    constructor(context: PlcContext, scanIntervalMs: number = 250)
     {
+        this.context = context;
         this.SCAN_INTERVAL_MS = scanIntervalMs;
 
         //this.init();
@@ -89,9 +102,9 @@ export abstract class PLC
         {
             const step = type == AddresType.HRF ? 2 : 1;
             let nameModel = `${name}_${mappingIndexStart + index}`;
-            const data = new DataModel(nameModel, addressStart + (index * step), type);
+            const data = new DataModel(nameModel, addressStart + (index * step), type, this.context.buffer);
             // Registrar el mapeo con un nombre único para cada dirección en el rango
-            mappingManager.registerMapping(nameModel, data);
+            this.context.mapping.registerMapping(nameModel, data);
 
             return data;
         });
@@ -107,9 +120,9 @@ export abstract class PLC
      */
     protected createAddress(name: string, address: number, type: AddresType, instrument?: InstrumentMapping): DataModel
     {
-        const data = new DataModel(name, address, type);
+        const data = new DataModel(name, address, type, this.context.buffer);
         // Registrar el mapeo con un nombre único para la dirección
-        mappingManager.registerMapping(`${name}`, data, instrument);
+        this.context.mapping.registerMapping(`${name}`, data, instrument);
 
         return data;
     }

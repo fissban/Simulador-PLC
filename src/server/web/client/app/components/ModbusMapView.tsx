@@ -11,7 +11,7 @@ const MAPPING_GROUPS = [
 ] as const;
 type MappingGroup = typeof MAPPING_GROUPS[number]["value"];
 
-export function ModbusMapView()
+export function ModbusMapView(props: { instanceId: string })
 {
     const [rows, setRows] = createSignal<RegisterRow[]>([]);
     const [isLoading, setIsLoading] = createSignal(true);
@@ -52,7 +52,7 @@ export function ModbusMapView()
 
         try
         {
-            const response = await fetch("/api/registers");
+            const response = await fetch(`/api/instances/${encodeURIComponent(props.instanceId)}/registers`);
             if (!response.ok)
             {
                 throw new Error(`HTTP ${response.status}`);
