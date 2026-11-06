@@ -6,7 +6,7 @@ export abstract class PLC
 {
     // Período completo de las ondas simuladas (cuánto tarda un ciclo).
     // Cuanto mayor sea, más progresivo será el cambio entre muestras/refrescos.
-    protected WAVE_PERIOD_MS = 120000;
+    protected WAVE_PERIOD_MS = 120 * 60 * 1000; // 120 minutos en milisegundos
 
     // Intervalo de escaneo: cada cuánto se ejecuta el ciclo `execute()`.
     // Debe ser mucho menor que `WAVE_PERIOD_MS` para muestrear la onda con
@@ -107,7 +107,7 @@ export abstract class PLC
      */
     protected createAddress(name: string, address: number, type: AddresType, instrument?: InstrumentMapping): DataModel
     {
-        const data = new DataModel(name,address, type);
+        const data = new DataModel(name, address, type);
         // Registrar el mapeo con un nombre único para la dirección
         mappingManager.registerMapping(`${name}`, data, instrument);
 
@@ -124,14 +124,15 @@ export abstract class PLC
     }
 
     /**
-     * Onda senoidal: oscila suavemente entre min y max con el período WAVE_PERIOD_MS.
+     * Onda senoidal: oscila suavemente entre min y max con el período indicado
+     * (por defecto WAVE_PERIOD_MS).
      */
-    protected sine(elapsedMs: number, min: number, max: number): number
+    protected sine(elapsedMs: number, min: number, max: number, periodMs: number = this.WAVE_PERIOD_MS): number
     {
         const { low, high } = this.normalizeBounds(min, max);
         const amplitude = (high - low) / 2;
         const center = low + amplitude;
-        const radians = 2 * Math.PI * ((elapsedMs % this.WAVE_PERIOD_MS) / this.WAVE_PERIOD_MS);
+        const radians = 2 * Math.PI * ((elapsedMs % periodMs) / periodMs);
         return center + amplitude * Math.sin(radians);
     }
 

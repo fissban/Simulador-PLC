@@ -33,6 +33,8 @@ export abstract class SC extends PLC
 {
     public readonly IA_SIZE = 50;
     public readonly ID_SIZE = 20;
+    // Duración de un ciclo completo de la senoidal analógica.
+    protected readonly ANALOG_SINE_PERIOD_MS = 2 * 60 * 60 * 1000;
 
     // =================== DIRECTOS =================== //
     public estadoEnsayo: DataModel | null = null;
@@ -142,8 +144,8 @@ export abstract class SC extends PLC
             const rawMin = analogico.rangoMin.read();
             const rawMax = analogico.rangoMax.read();
             // Desfase uniforme para que los canales no alcancen el máximo a la vez.
-            const phaseOffsetMs = index * this.WAVE_PERIOD_MS / Math.floor(Math.random() * this.analogicos.length + 1);
-            const value = this.sine(elapsedMs + phaseOffsetMs, rawMin, rawMax);
+            const phaseOffsetMs = index * this.ANALOG_SINE_PERIOD_MS / this.analogicos.length;
+            const value = this.sine(elapsedMs + phaseOffsetMs, rawMin, rawMax, this.ANALOG_SINE_PERIOD_MS);
             analogico.input.write(value);
         });
 
